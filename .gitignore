@@ -1,0 +1,95 @@
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# =========================
+# Virtual Environments
+# =========================
+.venv/
+venv/
+env/
+
+# =========================
+# uv (KEEP lock file)
+# =========================
+.uv/
+# DO NOT ignore uv.lock (we commit it)
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# Local environment files (SECRETS)
+# =========================
+.env
+.env.*
+*.env
+.envrc
+*.key
+*.pem
+*.crt
+secrets.*
+token.*
+apikey.*
+hf_token*
+openai_key*
+wandb_key*
+.env_superpod
+
+# optional: ignore local-only env script
+env_superpod.sh
+
+# =========================
+# Data / Outputs (big files)
+# =========================
+data/
+datasets/
+outputs/
+checkpoints/
+runs/
+logs/
+
+# =========================
+# Model / Weights
+# =========================
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.gguf
+
+# =========================
+# Cache
+# =========================
+.cache/
+.hf/
+.torch/
+wandb/
+
+# =========================
+# Archives
+# =========================
+*.zip
+*.tar.gz
+*.tgz
