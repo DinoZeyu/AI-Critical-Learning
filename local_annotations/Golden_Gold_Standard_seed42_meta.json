@@ -1,0 +1,28 @@
+{
+  "name": "Golden_Gold_Standard",
+  "step": "extract_by_is_noisy_and_reliance",
+  "seed": 42,
+  "n": 1000,
+  "threshold": 0.9,
+  "balanced": true,
+  "filters": [
+    "is_noisy==false",
+    "data_reliance>=0.9"
+  ],
+  "raw_index_map": "/lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/index_map.jsonl",
+  "reliance_path": "local_annotations/reliance_raw10k_seed42.jsonl",
+  "output_jsonl": "local_annotations/Golden_Gold_Standard_seed42.jsonl",
+  "label_hist": {
+    "airplane": 100,
+    "automobile": 100,
+    "bird": 100,
+    "cat": 100,
+    "deer": 100,
+    "dog": 100,
+    "frog": 100,
+    "horse": 100,
+    "ship": 100,
+    "truck": 100
+  },
+  "note": "Local-only output. No images copied. No orig_* fields stored. raw_relpath is relative to raw_dir."
+}

@@ -1,0 +1,48 @@
+name: raw10k
+file: /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl
+N: 10000
+summary:
+  min: 0.0
+  mean: 0.693873
+  median: 0.92
+  max: 1.0
+bin_counts_overall:
+  [0.0, 0.1): 2062
+  [0.1, 0.2): 245
+  [0.2, 0.3): 312
+  [0.3, 0.4): 20
+  [0.4, 0.5): 81
+  [0.5, 0.6): 2
+  [0.6, 0.7): 47
+  [0.7, 0.8): 79
+  [0.8, 0.9): 940
+  [0.9, 1.0]: 6212
+split_counts:
+  clean_is_noisy_false: 8000
+  noisy_is_noisy_true: 2000
+bin_counts_clean:
+  [0.0, 0.1): 148
+  [0.1, 0.2): 199
+  [0.2, 0.3): 289
+  [0.3, 0.4): 18
+  [0.4, 0.5): 79
+  [0.5, 0.6): 2
+  [0.6, 0.7): 47
+  [0.7, 0.8): 78
+  [0.8, 0.9): 933
+  [0.9, 1.0]: 6207
+bin_counts_noisy:
+  [0.0, 0.1): 1914
+  [0.1, 0.2): 46
+  [0.2, 0.3): 23
+  [0.3, 0.4): 2
+  [0.4, 0.5): 2
+  [0.5, 0.6): 0
+  [0.6, 0.7): 0
+  [0.7, 0.8): 1
+  [0.8, 0.9): 7
+  [0.9, 1.0]: 5
+clean_low_counts:
+  clean_low_lt_0.20: {'count': 347, 'ratio': 0.043375}
+  clean_low_lt_0.30: {'count': 636, 'ratio': 0.0795}
+  clean_low_lt_0.50: {'count': 733, 'ratio': 0.091625}

@@ -1,0 +1,30 @@
+[project]
+name = "ai-critical-learning"
+version = "0.1.0"
+description = "Critical Learning experiments on Superpod (CIFAR-10 etc.)"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+
+dependencies = [
+  "numpy",
+  "pandas",
+  "scikit-learn",
+  "scipy",
+  "matplotlib",
+  "seaborn",
+  "tensorboard",
+  "transformers",
+  "datasets",
+  "huggingface-hub",
+  "accelerate",
+  "safetensors",
+  "tqdm",
+  "pyyaml",
+  "openai>=2.24.0",
+]
+
+[dependency-groups]
+dev = [
+  "pytest",
+  "ruff",
+]
