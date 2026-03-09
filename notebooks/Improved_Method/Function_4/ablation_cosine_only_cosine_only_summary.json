@@ -1,0 +1,13 @@
+{
+  "best_test_acc": 0.5966666666666667,
+  "best_epoch": 20,
+  "best_ckpt": "runs/ablation_cosine_only/best.pt",
+  "metrics_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/ablation_cosine_only_cosine_only_metrics.jsonl",
+  "ablation_mode": "cosine_only",
+  "n_train": 9000,
+  "n_test": 1800,
+  "reliance_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl",
+  "golden_gold_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl",
+  "map_type": "piecewise",
+  "train_filter_noisy": "all"
+}
