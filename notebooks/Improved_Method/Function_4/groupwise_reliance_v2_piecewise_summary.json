@@ -1,0 +1,17 @@
+{
+  "best_test_acc": 0.4027777777777778,
+  "best_epoch": 20,
+  "best_ckpt": "runs/groupwise_reliance_v2_piecewise/best.pt",
+  "metrics_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/groupwise_reliance_v2_piecewise_metrics.jsonl",
+  "n_train": 9000,
+  "n_test": 1800,
+  "reliance_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl",
+  "golden_gold_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl",
+  "map_type": "piecewise",
+  "train_filter_noisy": "all",
+  "group_rule": {
+    "low": "r < 0.7",
+    "mid": "0.7 <= r < 0.9",
+    "high": "r >= 0.9"
+  }
+}

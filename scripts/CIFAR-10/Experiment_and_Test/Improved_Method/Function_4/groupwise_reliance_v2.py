@@ -8,20 +8,28 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from data_reliance import CifarJsonlRelianceDataset, build_transforms
-from utils import set_seed, accuracy, scale_from_reliance, evaluate, compute_lr
+from utils import set_seed, accuracy, cosine_lr, scale_from_reliance, evaluate
 from model import SimpleCNN
 
 
-def parse_args():
-    p = argparse.ArgumentParser("Ablation: cosine vs reliance vs cosine×reliance")
+def set_optimizer_lr(optimizer, lr: float):
+    for pg in optimizer.param_groups:
+        pg["lr"] = lr
 
-    # Data
+
+def parse_args():
+    p = argparse.ArgumentParser("v5-b: group-wise reliance lr / group-step update")
+
+    # Data paths
     p.add_argument("--train_images", type=str, required=True)
     p.add_argument("--train_jsonl", type=str, required=True)
     p.add_argument("--test_images", type=str, required=True)
     p.add_argument("--test_jsonl", type=str, required=True)
 
+    # Reliance file
     p.add_argument("--reliance_jsonl", type=str, required=True)
+
+    # Exclude golden_gold from TRAIN
     p.add_argument("--golden_gold_jsonl", type=str, default=None)
 
     # Training
@@ -29,7 +37,7 @@ def parse_args():
     p.add_argument("--batch_size", type=int, default=128)
     p.add_argument("--num_workers", type=int, default=8)
 
-    # LR
+    # Base cosine params
     p.add_argument("--base_lr", type=float, default=0.05)
     p.add_argument("--min_lr", type=float, default=0.001)
 
@@ -52,19 +60,19 @@ def parse_args():
     p.add_argument("--scale_min", type=float, default=0.2)
     p.add_argument("--scale_max", type=float, default=1.0)
 
-    # Ablation mode
-    p.add_argument("--ablation_mode", type=str, required=True, choices=["cosine_only", "reliance_only", "full"])
-
-    p.add_argument("--train_filter_noisy", type=str, default="all", choices=["all", "clean", "noisy"])
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--device", type=str, default="cuda")
 
-    p.add_argument("--save_dir", type=str, default="runs/cosine_reliance_ablation")
+    # Save
+    p.add_argument("--save_dir", type=str, default="runs/groupwise_reliance_lr")
     p.add_argument(
         "--metrics_dir",
         type=str,
         default="/users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks",
     )
+
+    # Optional: filter noisy in train ("all"|"clean"|"noisy")
+    p.add_argument("--train_filter_noisy", type=str, default="all", choices=["all", "clean", "noisy"])
 
     return p.parse_args()
 
@@ -74,6 +82,7 @@ def main():
     set_seed(args.seed)
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
 
+    # outputs
     save_dir = Path(args.save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
     best_ckpt = save_dir / "best.pt"
@@ -81,14 +90,13 @@ def main():
     metrics_dir = Path(args.metrics_dir)
     metrics_dir.mkdir(parents=True, exist_ok=True)
 
-    # Use save_dir name + ablation_mode to avoid overwriting
-    run_name = f"{Path(args.save_dir).name}_{args.ablation_mode}"
+    run_name = Path(args.save_dir).name
     metrics_path = metrics_dir / f"{run_name}_metrics.jsonl"
     summary_path = metrics_dir / f"{run_name}_summary.json"
     if metrics_path.exists():
         metrics_path.unlink()
 
-    # Datasets
+    # datasets
     train_ds = CifarJsonlRelianceDataset(
         images_root=args.train_images,
         index_jsonl=args.train_jsonl,
@@ -128,23 +136,25 @@ def main():
     )
 
     model = SimpleCNN(num_classes=10).to(device)
+
     optimizer = torch.optim.SGD(
         model.parameters(),
-        lr=args.base_lr,  # overwritten each step
+        lr=args.base_lr,
         momentum=args.momentum,
         weight_decay=args.weight_decay,
         nesterov=True,
     )
+
     ce = nn.CrossEntropyLoss()
 
     steps_per_epoch = len(train_loader)
     total_steps = args.epochs * steps_per_epoch
 
-    print(f"[INFO] ablation_mode={args.ablation_mode}")
     print(f"[INFO] device={device}")
     print(f"[INFO] n_train={len(train_ds)} n_test={len(test_ds)}")
     print(f"[INFO] golden_gold_excluded={bool(args.golden_gold_jsonl)}")
-    print(f"[INFO] base_lr={args.base_lr} min_lr={args.min_lr} steps={total_steps}")
+    print(f"[INFO] train_filter_noisy={args.train_filter_noisy}")
+    print(f"[INFO] base_lr={args.base_lr} min_lr={args.min_lr} cosine_steps={total_steps}")
     print(f"[INFO] map_type={args.map_type}")
     print(f"[INFO] metrics_jsonl={metrics_path}")
 
@@ -159,69 +169,93 @@ def main():
         run_loss = 0.0
         run_acc = 0.0
         run_rbar = 0.0
-        run_scale = 0.0
+        run_group_steps = 0
         n_seen = 0
+
+        run_low_n = 0
+        run_mid_n = 0
+        run_high_n = 0
 
         for x, y, r in train_loader:
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
+            r = r.to(device, non_blocking=True).float()
 
-            r_bar = float(r.mean().item())
-            scale = scale_from_reliance(r_bar, args)
+            # one cosine step per outer batch
+            base_lr_t = cosine_lr(global_step, total_steps, args.base_lr, args.min_lr)
 
-            lr_t = compute_lr(
-                mode=args.ablation_mode,
-                step=global_step,
-                total_steps=total_steps,
-                base_lr=args.base_lr,
-                min_lr=args.min_lr,
-                scale=scale,
-            )
-            optimizer.param_groups[0]["lr"] = lr_t
+            low_mask = r < args.thr_mid
+            mid_mask = (r >= args.thr_mid) & (r < args.thr_high)
+            high_mask = r >= args.thr_high
 
-            optimizer.zero_grad(set_to_none=True)
-            logits = model(x)
-            loss = ce(logits, y)
-            loss.backward()
-            optimizer.step()
+            group_info = [
+                ("low", low_mask),
+                ("mid", mid_mask),
+                ("high", high_mask),
+            ]
 
-            bs = y.size(0)
-            run_loss += loss.item() * bs
-            run_acc += accuracy(logits, y) * bs
-            run_rbar += r_bar * bs
-            run_scale += scale * bs
-            n_seen += bs
+            for group_name, mask in group_info:
+                if mask.sum().item() == 0:
+                    continue
+
+                x_g = x[mask]
+                y_g = y[mask]
+                r_g = r[mask]
+
+                r_bar_g = float(r_g.mean().item())
+                scale_g = scale_from_reliance(r_bar_g, args)
+                lr_g = base_lr_t * scale_g
+                set_optimizer_lr(optimizer, lr_g)
+
+                optimizer.zero_grad(set_to_none=True)
+                logits_g = model(x_g)
+                loss_g = ce(logits_g, y_g)
+                loss_g.backward()
+                optimizer.step()
+
+                bs_g = y_g.size(0)
+                run_loss += loss_g.item() * bs_g
+                run_acc += accuracy(logits_g, y_g) * bs_g
+                run_rbar += r_bar_g * bs_g
+                n_seen += bs_g
+                run_group_steps += 1
+
+                if group_name == "low":
+                    run_low_n += bs_g
+                elif group_name == "mid":
+                    run_mid_n += bs_g
+                elif group_name == "high":
+                    run_high_n += bs_g
+
             global_step += 1
 
         train_loss = run_loss / n_seen
         train_acc = run_acc / n_seen
         train_rbar = run_rbar / n_seen
-        train_scale = run_scale / n_seen
 
         test_loss, test_acc = evaluate(model, test_loader, device)
         dt = time.time() - t0
         lr_last = optimizer.param_groups[0]["lr"]
+        avg_group_steps_per_batch = run_group_steps / steps_per_epoch
 
         print(
             f"Epoch {epoch:03d}/{args.epochs} | "
             f"lr(last)={lr_last:.6f} | "
-            f"train_loss={train_loss:.4f} train_acc={train_acc:.4f} "
-            f"rbar={train_rbar:.4f} scale={train_scale:.4f} | "
-            f"test_loss={test_loss:.4f} test_acc={test_acc:.4f} | time={dt:.1f}s"
+            f"train_loss={train_loss:.4f} train_acc={train_acc:.4f} rbar={train_rbar:.4f} | "
+            f"test_loss={test_loss:.4f} test_acc={test_acc:.4f} | "
+            f"group_steps/batch={avg_group_steps_per_batch:.3f} | time={dt:.1f}s"
         )
 
         row = {
             "epoch": epoch,
-            "ablation_mode": args.ablation_mode,
             "lr_last": lr_last,
             "base_lr": args.base_lr,
             "min_lr": args.min_lr,
-            "scheduler": args.ablation_mode,
+            "scheduler": "groupwise_reliance_lr",
             "map_type": args.map_type,
             "train_loss": train_loss,
             "train_acc": train_acc,
             "train_rbar": train_rbar,
-            "train_scale": train_scale,
             "test_loss": test_loss,
             "test_acc": test_acc,
             "time_sec": dt,
@@ -234,6 +268,16 @@ def main():
             "reliance_jsonl": args.reliance_jsonl,
             "train_filter_noisy": args.train_filter_noisy,
             "seed": args.seed,
+            "group_steps_epoch": run_group_steps,
+            "avg_group_steps_per_batch": avg_group_steps_per_batch,
+            "low_samples_epoch": run_low_n,
+            "mid_samples_epoch": run_mid_n,
+            "high_samples_epoch": run_high_n,
+            "group_rule": {
+                "low": f"r < {args.thr_mid}",
+                "mid": f"{args.thr_mid} <= r < {args.thr_high}",
+                "high": f"r >= {args.thr_high}",
+            },
         }
         with open(metrics_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(row) + "\n")
@@ -259,13 +303,17 @@ def main():
                 "best_epoch": best_epoch,
                 "best_ckpt": str(best_ckpt),
                 "metrics_jsonl": str(metrics_path),
-                "ablation_mode": args.ablation_mode,
                 "n_train": len(train_ds),
                 "n_test": len(test_ds),
                 "reliance_jsonl": args.reliance_jsonl,
                 "golden_gold_jsonl": args.golden_gold_jsonl,
                 "map_type": args.map_type,
                 "train_filter_noisy": args.train_filter_noisy,
+                "group_rule": {
+                    "low": f"r < {args.thr_mid}",
+                    "mid": f"{args.thr_mid} <= r < {args.thr_high}",
+                    "high": f"r >= {args.thr_high}",
+                },
             },
             f,
             indent=2,

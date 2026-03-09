@@ -1,0 +1,16 @@
+{
+  "best_test_acc": 0.6833333333333333,
+  "best_epoch": 20,
+  "best_ckpt": "runs/hysteresis_instant_reliance_piecewise/best.pt",
+  "metrics_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/hysteresis_instant_reliance_piecewise_metrics.jsonl",
+  "n_train": 9000,
+  "n_test": 1800,
+  "reliance_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl",
+  "golden_gold_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl",
+  "map_type": "piecewise",
+  "use_instant_scale": true,
+  "ema_lambda": 0.87,
+  "ema_k": 2.0,
+  "ema_init": 0.0,
+  "train_filter_noisy": "all"
+}

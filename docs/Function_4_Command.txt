@@ -1,0 +1,135 @@
+cosine_plus_reliance file:
+python cosine_plus_reliance.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --reliance_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 \
+  --base_lr 0.05 --min_lr 0.001 \
+  --map_type piecewise \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/cosine_plus_reliance_piecewise 
+
+
+cosine_reliance_ablation
+
+cos only:
+python cosine_reliance_ablation.py \
+  --ablation_mode cosine_only \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --reliance_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 \
+  --base_lr 0.05 --min_lr 0.001 \
+  --map_type piecewise \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/ablation_cosine_only
+
+reliance_only:
+python cosine_reliance_ablation.py \
+  --ablation_mode reliance_only \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --reliance_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 \
+  --base_lr 0.05 --min_lr 0.001 \
+  --map_type piecewise \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/ablation_reliance_only
+
+full (cos * reliance):
+python cosine_reliance_ablation.py \
+  --ablation_mode full \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --reliance_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 \
+  --base_lr 0.05 --min_lr 0.001 \
+  --map_type piecewise \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/ablation_full
+
+
+
+# Sample and Groupwise Reliance files:
+
+  python sample_reliance.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --reliance_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 \
+  --base_lr 0.05 --min_lr 0.001 \
+  --map_type piecewise \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/sample_reliance_piecewise
+
+  python groupwise_reliance.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --reliance_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 \
+  --base_lr 0.05 --min_lr 0.001 \
+  --map_type piecewise \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/groupwise_reliance_piecewise
+
+  python groupwise_reliance_v2.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --reliance_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 \
+  --base_lr 0.05 --min_lr 0.001 \
+  --map_type piecewise \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/groupwise_reliance_v2_piecewise
+
+
+# hyeteresis reliance file:
+python hysteresis_reliance.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --reliance_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 \
+  --base_lr 0.05 --min_lr 0.001 \
+  --map_type piecewise \
+  --ema_lambda 0.9 --ema_k 2.15 --ema_init 0.0 \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/hysteresis_reliance_piecewise
+
+python hysteresis_reliance.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --reliance_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 \
+  --base_lr 0.05 --min_lr 0.001 \
+  --map_type piecewise \
+  --ema_lambda 0.87 --ema_k 2.0 --ema_init 0.0 \
+  --use_instant_scale \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/hysteresis_instant_reliance_piecewise

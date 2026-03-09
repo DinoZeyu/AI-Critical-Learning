@@ -8,20 +8,44 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from data_reliance import CifarJsonlRelianceDataset, build_transforms
-from utils import set_seed, accuracy, scale_from_reliance, evaluate, compute_lr
+from utils import set_seed, accuracy, cosine_lr, evaluate
 from model import SimpleCNN
 
 
-def parse_args():
-    p = argparse.ArgumentParser("Ablation: cosine vs reliance vs cosine×reliance")
+def sample_weight_from_reliance(r: torch.Tensor, args) -> torch.Tensor:
+    """
+    Input:
+        r: shape [B], each sample's reliance in [0,1]
+    Output:
+        weight: shape [B]
+    """
+    r = torch.clamp(r, 0.0, 1.0)
 
-    # Data
+    if args.map_type == "piecewise":
+        w = torch.full_like(r, fill_value=args.scale_low)
+        w = torch.where(r >= args.thr_mid, torch.full_like(r, args.scale_mid), w)
+        w = torch.where(r >= args.thr_high, torch.full_like(r, args.scale_high), w)
+        return w
+
+    # exp
+    w = torch.exp(-args.k * (1.0 - r))
+    w = torch.clamp(w, min=args.scale_min, max=args.scale_max)
+    return w
+
+
+def parse_args():
+    p = argparse.ArgumentParser("v5-a: group-wise reliance weighting")
+
+    # Data paths
     p.add_argument("--train_images", type=str, required=True)
     p.add_argument("--train_jsonl", type=str, required=True)
     p.add_argument("--test_images", type=str, required=True)
     p.add_argument("--test_jsonl", type=str, required=True)
 
+    # Reliance file
     p.add_argument("--reliance_jsonl", type=str, required=True)
+
+    # Exclude golden_gold from TRAIN
     p.add_argument("--golden_gold_jsonl", type=str, default=None)
 
     # Training
@@ -29,7 +53,7 @@ def parse_args():
     p.add_argument("--batch_size", type=int, default=128)
     p.add_argument("--num_workers", type=int, default=8)
 
-    # LR
+    # Base cosine params
     p.add_argument("--base_lr", type=float, default=0.05)
     p.add_argument("--min_lr", type=float, default=0.001)
 
@@ -52,19 +76,19 @@ def parse_args():
     p.add_argument("--scale_min", type=float, default=0.2)
     p.add_argument("--scale_max", type=float, default=1.0)
 
-    # Ablation mode
-    p.add_argument("--ablation_mode", type=str, required=True, choices=["cosine_only", "reliance_only", "full"])
-
-    p.add_argument("--train_filter_noisy", type=str, default="all", choices=["all", "clean", "noisy"])
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--device", type=str, default="cuda")
 
-    p.add_argument("--save_dir", type=str, default="runs/cosine_reliance_ablation")
+    # Save
+    p.add_argument("--save_dir", type=str, default="runs/groupwise_reliance")
     p.add_argument(
         "--metrics_dir",
         type=str,
         default="/users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks",
     )
+
+    # Optional: filter noisy in train ("all"|"clean"|"noisy")
+    p.add_argument("--train_filter_noisy", type=str, default="all", choices=["all", "clean", "noisy"])
 
     return p.parse_args()
 
@@ -74,6 +98,7 @@ def main():
     set_seed(args.seed)
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
 
+    # outputs
     save_dir = Path(args.save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
     best_ckpt = save_dir / "best.pt"
@@ -81,14 +106,13 @@ def main():
     metrics_dir = Path(args.metrics_dir)
     metrics_dir.mkdir(parents=True, exist_ok=True)
 
-    # Use save_dir name + ablation_mode to avoid overwriting
-    run_name = f"{Path(args.save_dir).name}_{args.ablation_mode}"
+    run_name = Path(args.save_dir).name
     metrics_path = metrics_dir / f"{run_name}_metrics.jsonl"
     summary_path = metrics_dir / f"{run_name}_summary.json"
     if metrics_path.exists():
         metrics_path.unlink()
 
-    # Datasets
+    # datasets
     train_ds = CifarJsonlRelianceDataset(
         images_root=args.train_images,
         index_jsonl=args.train_jsonl,
@@ -128,23 +152,26 @@ def main():
     )
 
     model = SimpleCNN(num_classes=10).to(device)
+
     optimizer = torch.optim.SGD(
         model.parameters(),
-        lr=args.base_lr,  # overwritten each step
+        lr=args.base_lr,  # overwritten each step by cosine lr
         momentum=args.momentum,
         weight_decay=args.weight_decay,
         nesterov=True,
     )
-    ce = nn.CrossEntropyLoss()
+
+    # per-sample CE for weighted loss
+    ce = nn.CrossEntropyLoss(reduction="none")
 
     steps_per_epoch = len(train_loader)
     total_steps = args.epochs * steps_per_epoch
 
-    print(f"[INFO] ablation_mode={args.ablation_mode}")
     print(f"[INFO] device={device}")
     print(f"[INFO] n_train={len(train_ds)} n_test={len(test_ds)}")
     print(f"[INFO] golden_gold_excluded={bool(args.golden_gold_jsonl)}")
-    print(f"[INFO] base_lr={args.base_lr} min_lr={args.min_lr} steps={total_steps}")
+    print(f"[INFO] train_filter_noisy={args.train_filter_noisy}")
+    print(f"[INFO] base_lr={args.base_lr} min_lr={args.min_lr} cosine_steps={total_steps}")
     print(f"[INFO] map_type={args.map_type}")
     print(f"[INFO] metrics_jsonl={metrics_path}")
 
@@ -159,44 +186,48 @@ def main():
         run_loss = 0.0
         run_acc = 0.0
         run_rbar = 0.0
-        run_scale = 0.0
+        run_wbar = 0.0
         n_seen = 0
 
         for x, y, r in train_loader:
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
+            r = r.to(device, non_blocking=True).float()
 
             r_bar = float(r.mean().item())
-            scale = scale_from_reliance(r_bar, args)
 
-            lr_t = compute_lr(
-                mode=args.ablation_mode,
-                step=global_step,
-                total_steps=total_steps,
-                base_lr=args.base_lr,
-                min_lr=args.min_lr,
-                scale=scale,
-            )
+            lr_t = cosine_lr(global_step, total_steps, args.base_lr, args.min_lr)
             optimizer.param_groups[0]["lr"] = lr_t
 
             optimizer.zero_grad(set_to_none=True)
+
             logits = model(x)
-            loss = ce(logits, y)
+            loss_vec = ce(logits, y)  # [B]
+            weight_vec = sample_weight_from_reliance(r, args)  # [B]
+
+            # V5-A normalized weighted loss:
+            # L = sum_i (w_i * l_i) / sum_i w_i
+            weighted_loss_sum = (loss_vec * weight_vec).sum()
+            weight_sum = weight_vec.sum().clamp_min(1e-12)
+            loss = weighted_loss_sum / weight_sum
+
             loss.backward()
             optimizer.step()
 
             bs = y.size(0)
+            w_bar = float(weight_vec.mean().item())
+
             run_loss += loss.item() * bs
             run_acc += accuracy(logits, y) * bs
             run_rbar += r_bar * bs
-            run_scale += scale * bs
+            run_wbar += w_bar * bs
             n_seen += bs
             global_step += 1
 
         train_loss = run_loss / n_seen
         train_acc = run_acc / n_seen
         train_rbar = run_rbar / n_seen
-        train_scale = run_scale / n_seen
+        train_wbar = run_wbar / n_seen
 
         test_loss, test_acc = evaluate(model, test_loader, device)
         dt = time.time() - t0
@@ -206,22 +237,21 @@ def main():
             f"Epoch {epoch:03d}/{args.epochs} | "
             f"lr(last)={lr_last:.6f} | "
             f"train_loss={train_loss:.4f} train_acc={train_acc:.4f} "
-            f"rbar={train_rbar:.4f} scale={train_scale:.4f} | "
+            f"rbar={train_rbar:.4f} wbar={train_wbar:.4f} | "
             f"test_loss={test_loss:.4f} test_acc={test_acc:.4f} | time={dt:.1f}s"
         )
 
         row = {
             "epoch": epoch,
-            "ablation_mode": args.ablation_mode,
             "lr_last": lr_last,
             "base_lr": args.base_lr,
             "min_lr": args.min_lr,
-            "scheduler": args.ablation_mode,
+            "scheduler": "groupwise_reliance",
             "map_type": args.map_type,
             "train_loss": train_loss,
             "train_acc": train_acc,
             "train_rbar": train_rbar,
-            "train_scale": train_scale,
+            "train_wbar": train_wbar,
             "test_loss": test_loss,
             "test_acc": test_acc,
             "time_sec": dt,
@@ -259,7 +289,6 @@ def main():
                 "best_epoch": best_epoch,
                 "best_ckpt": str(best_ckpt),
                 "metrics_jsonl": str(metrics_path),
-                "ablation_mode": args.ablation_mode,
                 "n_train": len(train_ds),
                 "n_test": len(test_ds),
                 "reliance_jsonl": args.reliance_jsonl,
