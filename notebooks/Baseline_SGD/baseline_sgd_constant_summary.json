@@ -1,0 +1,10 @@
+{
+  "best_test_acc": 0.5811111111111111,
+  "best_epoch": 20,
+  "best_ckpt": "runs/baseline_sgd_constant/best.pt",
+  "run_dir": "runs/baseline_sgd_constant",
+  "metrics_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/baseline_sgd_constant_metrics.jsonl",
+  "n_train": 9000,
+  "n_test": 1800,
+  "golden_gold_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl"
+}

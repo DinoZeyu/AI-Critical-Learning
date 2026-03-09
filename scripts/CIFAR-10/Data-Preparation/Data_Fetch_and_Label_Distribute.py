@@ -172,7 +172,7 @@ def main():
         })
 
     # Write index_map.jsonl (one JSON per line)
-    map_path = ann_dir / "index_map.jsonl"
+    map_path = ann_dir / "train_index_map.jsonl"
     with map_path.open("w", encoding="utf-8") as f:
         for r in rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
@@ -203,7 +203,7 @@ def main():
     print(f"[OK] Raw exported: {out_dir}")
     print(f"[OK] Images: {img_dir} (count={len(rows)})")
     print(f"[OK] Mapping: {map_path}")
-    print(f"[OK] Meta: {ann_dir / 'meta.json'}")
+    print(f"[OK] Meta: {ann_dir / 'train_meta.json'}")
 
 
 if __name__ == "__main__":

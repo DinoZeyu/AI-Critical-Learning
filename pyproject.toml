@@ -21,6 +21,10 @@ dependencies = [
   "tqdm",
   "pyyaml",
   "openai>=2.24.0",
+
+  # PyTorch (CUDA 12.8 build via the pytorch-cu128 index below)
+  "torch==2.10.*",
+  "torchvision==0.25.*",
 ]
 
 [dependency-groups]
@@ -28,3 +32,10 @@ dev = [
   "pytest",
   "ruff",
 ]
+
+# Use PyTorch CUDA 12.8 wheels from the official PyTorch index.
+# `explicit = true` prevents uv from using this index unless you pass `--index pytorch-cu128`.
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

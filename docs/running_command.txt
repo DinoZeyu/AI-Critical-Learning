@@ -1,0 +1,23 @@
+cd /users/zeyuhan/charlie_codebase/AI-Critical-Learning/scripts/CIFAR-10/Experiment_and_Test/Baseline
+
+SGD + fixed LR
+python baseline_sgd.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 --lr 0.05 --scheduler none \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/baseline_sgd_constant
+
+SGD + cosine LR
+python baseline_sgd.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images  /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images \
+  --test_jsonl   /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/test_index_map.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 --lr 0.05 --scheduler cosine --min_lr 0.001 \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
+  --save_dir runs/baseline_sgd_cosine

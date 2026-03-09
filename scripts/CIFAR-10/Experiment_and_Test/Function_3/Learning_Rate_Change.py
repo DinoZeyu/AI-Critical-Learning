@@ -1,0 +1,1 @@
+/lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images
