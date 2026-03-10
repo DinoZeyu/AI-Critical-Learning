@@ -1,0 +1,15 @@
+{
+  "best_test_acc": 0.7183333333333334,
+  "best_epoch": 39,
+  "best_ckpt": "runs/gradient_histroy_40_epoch/best.pt",
+  "metrics_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/gradient_histroy_40_epoch_metrics.jsonl",
+  "n_train": 9000,
+  "n_test": 1800,
+  "reliance_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl",
+  "golden_gold_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl",
+  "grad_mu": 0.8,
+  "alpha_rel": 1.3,
+  "beta_dir": 1.2,
+  "dir_gamma": 1.5,
+  "train_filter_noisy": "all"
+}
