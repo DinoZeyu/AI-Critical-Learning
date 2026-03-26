@@ -21,10 +21,10 @@ dependencies = [
   "tqdm",
   "pyyaml",
   "openai>=2.24.0",
-
   # PyTorch (CUDA 12.8 build via the pytorch-cu128 index below)
   "torch==2.10.*",
   "torchvision==0.25.*",
+  "pillow>=12.1.1",
 ]
 
 [dependency-groups]

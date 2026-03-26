@@ -1,0 +1,18 @@
+{
+  "dataset": "CIFAR-10",
+  "step": "train_clean_reliance_from_old_reliance_plus_rescore_noisy",
+  "started_at": "2026-03-25 23:13:57",
+  "seed": 42,
+  "model_for_rescored_rows": "gpt-4o",
+  "prompt_path": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/Prompt/prompt.txt",
+  "old_reliance_path": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/reliance_raw10k_seed42.jsonl",
+  "train_index_map": "/lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl",
+  "train_images_root": "/lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images",
+  "output_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/train_clean_reliance.jsonl",
+  "failed_jsonl": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/train_clean_reliance_failed.jsonl",
+  "written_this_run": 2237,
+  "reused_clean_rows_this_run": 1784,
+  "rescored_noisy_rows_this_run": 453,
+  "failed_rows_this_run": 1,
+  "note": "Output is a full clean-train reliance file. Originally clean rows are reused from old reliance; originally noisy rows are rescored using orig_label/orig_class from train_index_map. All output rows set is_noisy=false. Rows that fail rescoring are logged to failed_jsonl and skipped."
+}

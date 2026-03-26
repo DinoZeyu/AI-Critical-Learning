@@ -1,5 +1,7 @@
 cd /users/zeyuhan/charlie_codebase/AI-Critical-Learning/scripts/CIFAR-10/Experiment_and_Test/Baseline
 
+## Train Noise and Test Clean
+
 SGD + fixed LR
 python baseline_sgd.py \
   --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
@@ -21,3 +23,102 @@ python baseline_sgd.py \
   --epochs 20 --batch_size 128 --lr 0.05 --scheduler cosine --min_lr 0.001 \
   --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks \
   --save_dir runs/baseline_sgd_cosine
+
+
+## Train Noise and Test Noise
+
+Train noisy / Test blur
+python baseline_train_noise_test_noise.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images_blur_r1.2 \
+  --test_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/test_index_map_blur_r1.2.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 --lr 0.05 --scheduler cosine --min_lr 0.001 \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/Baseline_SGD/train_noise_test_noise \
+  --save_dir runs/baseline_sgd_cosine_trainNoisy_testBlur
+
+Train noisy / Test Guassian
+python baseline_train_noise_test_noise.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images_gaussian_noise_s12 \
+  --test_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/test_index_map_gaussian_noise_s12.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 --lr 0.05 --scheduler cosine --min_lr 0.001 \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/Baseline_SGD/train_noise_test_noise \
+  --save_dir runs/baseline_sgd_cosine_trainNoisy_testGaussian
+
+
+Train noisy / Test Brightness
+python baseline_train_noise_test_noise.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images_brightness_f0.65 \
+  --test_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/test_index_map_brightness_f0.65.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --epochs 20 --batch_size 128 --lr 0.05 --scheduler cosine --min_lr 0.001 \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/Baseline_SGD/train_noise_test_noise \
+  --save_dir runs/baseline_sgd_cosine_trainNoisy_testBrightness
+
+
+
+## Train Clean and Test Noise
+
+Train clean / Test blur
+python baseline_train_clean_test_noise.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images_blur_r1.2 \
+  --test_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/test_index_map_blur_r1.2.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/Baseline_SGD/train_clean_test_noise \
+  --metrics_name baseline_blur_metrics.jsonl \
+  --train_filter_noisy all \
+  --scheduler cosine \
+  --epochs 20 \
+  --batch_size 128 \
+  --lr 0.05 \
+  --min_lr 0.001 \
+  --momentum 0.9 \
+  --weight_decay 5e-4 \
+  --seed 42
+
+Train clean / Test Guassian
+python baseline_train_clean_test_noise.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images_gaussian_noise_s12 \
+  --test_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/test_index_map_gaussian_noise_s12.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/Baseline_SGD/train_clean_test_noise \
+  --metrics_name baseline_gaussian_metrics.jsonl \
+  --train_filter_noisy all \
+  --scheduler cosine \
+  --epochs 20 \
+  --batch_size 128 \
+  --lr 0.05 \
+  --min_lr 0.001 \
+  --momentum 0.9 \
+  --weight_decay 5e-4 \
+  --seed 42
+
+
+Train clean / Test Brightness
+python baseline_train_clean_test_noise.py \
+  --train_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/train_images \
+  --train_jsonl /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/annotations/train_index_map.jsonl \
+  --test_images /lustre/smuexa01/client/users/zeyuhan/cl_data/raw/cifar10/v1_seed42/test_images_brightness_f0.65 \
+  --test_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/test_index_map_brightness_f0.65.jsonl \
+  --golden_gold_jsonl /users/zeyuhan/charlie_codebase/AI-Critical-Learning/local_annotations/Golden_Gold_Standard_seed42.jsonl \
+  --metrics_dir /users/zeyuhan/charlie_codebase/AI-Critical-Learning/notebooks/Baseline_SGD/train_clean_test_noise \
+  --metrics_name baseline_brightness_metrics.jsonl \
+  --train_filter_noisy all \
+  --scheduler cosine \
+  --epochs 20 \
+  --batch_size 128 \
+  --lr 0.05 \
+  --min_lr 0.001 \
+  --momentum 0.9 \
+  --weight_decay 5e-4 \
+  --seed 42
