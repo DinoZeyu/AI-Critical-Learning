@@ -62,12 +62,15 @@ env_superpod.sh
 # =========================
 # Data / Outputs (big files)
 # =========================
-data/
-datasets/
-outputs/
-checkpoints/
-runs/
-logs/
+/data/
+/Data/
+/Image_Data/
+/datasets/
+/Datasets/
+/outputs/
+/checkpoints/
+/runs/
+/logs/
 
 # =========================
 # Model / Weights

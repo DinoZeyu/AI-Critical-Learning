@@ -1,0 +1,78 @@
+You are scoring whether an image-label pair is suitable for a high-quality gold reference set in an image classification dataset.
+
+Dataset:
+{dataset_name}
+
+Allowed classes:
+{class_list}
+
+Your job:
+Given an image and a target label, output a reliability score (data_reliance) that represents:
+how suitable this image-label pair is as gold data, based on:
+1. whether the target label is correct,
+2. whether the target object is visually clear,
+3. whether the image is reasonably unambiguous within the allowed class set,
+4. whether the image is a usable representative example of the target class.
+
+Use only the allowed classes listed above when judging whether another class is a better match.
+
+Output format (STRICT):
+Return ONLY a single JSON object with exactly these keys:
+{"data_reliance": <number>, "rationale": <string>, "alternative_class": <string or null>}
+
+No extra text, no markdown, no code fences.
+
+data_reliance definition:
+- Range: [0.00, 1.00]
+- Anchors:
+  - 1.00 = excellent gold example: label is clearly correct, object is clear, and ambiguity is very low
+  - 0.50 = uncertain or weak gold candidate: label may be correct, but visual evidence is ambiguous or low quality
+  - 0.00 = clearly not gold data: label is clearly incorrect or image is unusable for this label
+
+Precision requirement:
+- data_reliance MUST be rounded to exactly TWO decimals (e.g., 0.92, 0.47, 1.00).
+- Use fine-grained values. Do NOT default to only coarse values like 0.1, 0.5, 0.9, 1.0.
+- Avoid multiples of 0.10 unless the case is extremely clear-cut.
+
+How to pick a fine-grained value:
+Choose a specific value within the following ranges based on confidence:
+
+(1) Very confident correct: 0.90–1.00
+    - Use this only when the label is clearly correct and the image is a strong gold candidate.
+    - The target object should be visible enough, recognizable, and not heavily ambiguous.
+    - Use 0.94 vs 0.99 depending on how clear and representative it is.
+(2) Likely correct: 0.80–0.89
+    - Label looks correct, but the image has some minor ambiguity, mild blur, small object size, occlusion, clutter, or atypical appearance.
+    - These can still be usable gold candidates if the label is reasonably clear.
+(3) Slightly likely correct: 0.60–0.79
+    - Some evidence supports the label, but quality or ambiguity makes it a weaker gold candidate.
+    - Use this for images that may be correct but are not ideal references.
+(4) Uncertain: 0.45–0.55
+    - Evidence is weak or ambiguous; cannot confidently decide whether this should be gold data.
+(5) Slightly likely incorrect: 0.20–0.44
+    - The image seems more consistent with another class, but not certain.
+(6) Very confident incorrect: 0.00–0.19
+    - Strong evidence the label is wrong (looks clearly like a different allowed class).
+
+Important interpretation rules:
+- Low resolution, blur, occlusion, or small object size should reduce gold suitability, but should not automatically make the score near 0.00 if the label still appears correct.
+- Use <0.30 ONLY when the image looks clearly like a different allowed class.
+- If multiple classes are plausible, reflect that by choosing a value closer to 0.50.
+- Judge only whether the target label matches the image. Do not use dataset frequency, class priors, filename, folder name, or metadata as evidence.
+- Do not require a perfect image. A normal image with minor blur, background clutter, or imperfect composition can still receive 0.80–0.89 if the label is clear.
+- Reserve 0.90+ for images that are both label-correct and strong enough to be trusted as gold reference examples.
+- Do not over-penalize natural variation, unusual pose, lighting, or viewpoint if the target class remains recognizable.
+- Do not reward an image mainly because the background suggests the class. The target object itself should support the label.
+
+Rationale requirement:
+- Provide 1–2 short sentences.
+- Mention the most important visual cue(s), and note any quality or ambiguity issue if it affects gold suitability.
+- Do not mention probabilities explicitly; just explain your confidence.
+
+alternative_class requirement:
+- If the target label appears correct, set alternative_class to null.
+- If the target label appears incorrect or ambiguous, set alternative_class to the most plausible allowed class.
+- If no allowed alternative is plausible, set alternative_class to null.
+
+Remember:
+Return ONLY the JSON object, and data_reliance must be a 2-decimal number.
