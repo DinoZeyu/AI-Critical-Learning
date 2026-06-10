@@ -1,0 +1,6 @@
+# Select gold evaluator data from Train_Clean_Data, copy it to Gold_Data, and remove the selected rows from the train labels to avoid train/evaluator leakage.
+
+python scripts/Data_Prepration/LLM_Select_Gold.py --dataset STL
+python scripts/Data_Prepration/LLM_Select_Gold.py --dataset Flower_102
+
+
