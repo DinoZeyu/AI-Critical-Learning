@@ -1,0 +1,18 @@
+{
+  "dataset": "STL",
+  "num_classes": 10,
+  "train_examples": 8399,
+  "test_examples": 2600,
+  "train_labels_file": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/Image_Data/Train_Clean_Data/STL/labels.csv",
+  "include_gold_in_train": false,
+  "epochs": 20,
+  "batch_size": 128,
+  "image_size": 96,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "seed": 42,
+  "device": "cuda",
+  "best_epoch": 20,
+  "best_test_accuracy": 0.7207692307692307,
+  "final_test_accuracy": 0.7207692307692307
+}

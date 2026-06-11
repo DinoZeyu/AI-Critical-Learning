@@ -1,0 +1,21 @@
+{
+  "dataset": "Flower_102",
+  "num_classes": 102,
+  "train_dir": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0",
+  "test_dir": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/Image_Data/Test_Clean_Data/Flower_102",
+  "train_labels_file": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0/labels.csv",
+  "test_labels_file": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/Image_Data/Test_Clean_Data/Flower_102/labels.csv",
+  "include_gold_in_train": false,
+  "train_examples": 5953,
+  "test_examples": 1637,
+  "epochs": 20,
+  "batch_size": 128,
+  "image_size": 224,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "seed": 42,
+  "device": "cuda",
+  "best_epoch": 18,
+  "best_test_accuracy": 0.5345143555284056,
+  "final_test_accuracy": 0.5149664019547954
+}

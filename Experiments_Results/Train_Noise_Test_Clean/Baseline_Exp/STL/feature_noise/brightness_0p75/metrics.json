@@ -1,0 +1,21 @@
+{
+  "dataset": "STL",
+  "num_classes": 10,
+  "train_dir": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/Image_Data/Train_Noise_Data/STL/feature_noise/brightness_0p75",
+  "test_dir": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/Image_Data/Test_Clean_Data/STL",
+  "train_labels_file": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/Image_Data/Train_Noise_Data/STL/feature_noise/brightness_0p75/labels.csv",
+  "test_labels_file": "/users/zeyuhan/charlie_codebase/AI-Critical-Learning/Image_Data/Test_Clean_Data/STL/labels.csv",
+  "include_gold_in_train": false,
+  "train_examples": 8399,
+  "test_examples": 2600,
+  "epochs": 20,
+  "batch_size": 128,
+  "image_size": 96,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "seed": 42,
+  "device": "cuda",
+  "best_epoch": 17,
+  "best_test_accuracy": 0.691923076923077,
+  "final_test_accuracy": 0.6534615384615384
+}

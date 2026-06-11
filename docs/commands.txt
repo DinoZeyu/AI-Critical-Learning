@@ -4,3 +4,83 @@ python scripts/Data_Prepration/LLM_Select_Gold.py --dataset STL
 python scripts/Data_Prepration/LLM_Select_Gold.py --dataset Flower_102
 
 
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+# Baseline clean-train / clean-test experiments.
+# Default behavior trains on Train_Clean_Data/<dataset>/labels.csv, where selected gold rows have already been removed.
+# Test data is always Test_Clean_Data/<dataset>/labels.csv.
+# Results are saved to Experiments_Results/Train_Clean_Test_Clean/Baseline_Exp/<dataset>/clean/.
+
+python scripts/Baseline_Exp.py --dataset STL
+python scripts/Baseline_Exp.py --dataset Flower_102
+
+# Baseline ablation that intentionally includes the original gold rows in train.
+# This uses Train_Clean_Data/<dataset>/labels_before_gold_split.csv instead of labels.csv.
+# Use this only when you want to compare against a train set that still contains the gold rows.
+
+python scripts/Baseline_Exp.py --dataset STL --include-gold-in-train
+python scripts/Baseline_Exp.py --dataset Flower_102 --include-gold-in-train
+
+# Optional Flower_102 run with larger image resolution if GPU memory allows.
+# Default Flower_102 image size is 224; STL defaults to its native 96.
+
+python scripts/Baseline_Exp.py --dataset Flower_102 --image-size 384
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+# Create train noisy datasets from Train_Clean_Data labels.
+# Train_Clean_Data/<dataset>/labels.csv has selected gold rows removed, so the noisy train data also excludes gold rows.
+# Feature noise keeps the same labels as Train_Clean_Data and only changes image pixels.
+# Label noise keeps the same images and randomly changes a configurable fraction of labels to another existing class.
+# Customize noise with --value:
+# blur: Gaussian blur radius
+# brightness: brightness factor
+# gaussian: pixel noise sigma
+# label_shuffle: fraction of labels to change
+# Output layout:
+# Image_Data/Train_Noise_Data/<dataset>/feature_noise/<noise_type>_<value>/
+# Image_Data/Train_Noise_Data/<dataset>/label_noise/label_shuffle_<value>/
+
+# STL feature noise examples. Change --value to choose a different strength.
+python scripts/Data_Prepration/make_noisy_data.py --dataset STL --split train --noise-type blur --value 3
+python scripts/Data_Prepration/make_noisy_data.py --dataset STL --split train --noise-type brightness --value 0.75
+python scripts/Data_Prepration/make_noisy_data.py --dataset STL --split train --noise-type gaussian --value 30
+
+# STL label noise example. Change --value to choose a different shuffle fraction.
+python scripts/Data_Prepration/make_noisy_data.py --dataset STL --split train --noise-type label_shuffle --value 0.2
+
+# Flower_102 feature noise examples. Change --value to choose a different strength.
+python scripts/Data_Prepration/make_noisy_data.py --dataset Flower_102 --split train --noise-type blur --value 3
+python scripts/Data_Prepration/make_noisy_data.py --dataset Flower_102 --split train --noise-type brightness --value 0.75
+python scripts/Data_Prepration/make_noisy_data.py --dataset Flower_102 --split train --noise-type gaussian --value 30
+
+# Flower_102 label noise example. Change --value to choose a different shuffle fraction.
+python scripts/Data_Prepration/make_noisy_data.py --dataset Flower_102 --split train --noise-type label_shuffle --value 0.2
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+# Baseline train-noise / test-clean experiments.
+# This uses the generic Baseline_Exp.py entrypoint with --train-dir pointing to a noisy train dataset.
+# Test data remains clean: Image_Data/Test_Clean_Data/<dataset>/labels.csv.
+# Results are saved in separate subfolders:
+# Experiments_Results/Train_Noise_Test_Clean/Baseline_Exp/<dataset>/feature_noise/<noise_run>/
+# Experiments_Results/Train_Noise_Test_Clean/Baseline_Exp/<dataset>/label_noise/<noise_run>/
+
+# STL train feature noise -> clean test.
+python scripts/Baseline_Exp.py --dataset STL --train-dir Image_Data/Train_Noise_Data/STL/feature_noise/blur_3p0 --test-dir Image_Data/Test_Clean_Data/STL
+python scripts/Baseline_Exp.py --dataset STL --train-dir Image_Data/Train_Noise_Data/STL/feature_noise/brightness_0p75 --test-dir Image_Data/Test_Clean_Data/STL
+python scripts/Baseline_Exp.py --dataset STL --train-dir Image_Data/Train_Noise_Data/STL/feature_noise/gaussian_30p0 --test-dir Image_Data/Test_Clean_Data/STL
+
+# STL train label noise -> clean test.
+python scripts/Baseline_Exp.py --dataset STL --train-dir Image_Data/Train_Noise_Data/STL/label_noise/label_shuffle_0p2 --test-dir Image_Data/Test_Clean_Data/STL
+
+# Flower_102 train feature noise -> clean test.
+python scripts/Baseline_Exp.py --dataset Flower_102 --train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/blur_3p0 --test-dir Image_Data/Test_Clean_Data/Flower_102
+python scripts/Baseline_Exp.py --dataset Flower_102 --train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/brightness_0p75 --test-dir Image_Data/Test_Clean_Data/Flower_102
+python scripts/Baseline_Exp.py --dataset Flower_102 --train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0 --test-dir Image_Data/Test_Clean_Data/Flower_102
+
+# Flower_102 train label noise -> clean test.
+python scripts/Baseline_Exp.py --dataset Flower_102   --train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 --test-dir Image_Data/Test_Clean_Data/Flower_102

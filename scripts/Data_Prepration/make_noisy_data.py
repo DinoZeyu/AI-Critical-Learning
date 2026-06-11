@@ -43,7 +43,7 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help=(
             "Noise strength. blur: radius, brightness: factor, "
-            "gaussian: pixel sigma."
+            "gaussian: pixel sigma, label_shuffle: fraction of labels to change."
         ),
     )
     parser.add_argument(
@@ -55,8 +55,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-name",
         help=(
-            "Optional output dataset folder name. Defaults to "
-            "<dataset>_<noise-type>_<value>."
+            "Optional output leaf folder name. Defaults to "
+            "<noise-type>_<value> under <dataset>/feature_noise or "
+            "<dataset>/label_noise."
         ),
     )
     parser.add_argument(
@@ -71,6 +72,12 @@ def format_value(value: float) -> str:
     return str(value).replace(".", "p").replace("-", "neg")
 
 
+def noise_group(noise_type: str) -> str:
+    if noise_type == "label_shuffle":
+        return "label_noise"
+    return "feature_noise"
+
+
 def main() -> None:
     args = parse_args()
 
@@ -80,9 +87,9 @@ def main() -> None:
 
     output_name = args.output_name
     if output_name is None:
-        output_name = f"{args.dataset}_{args.noise_type}_{format_value(args.value)}"
+        output_name = f"{args.noise_type}_{format_value(args.value)}"
 
-    output_dataset_dir = noise_root / output_name
+    output_dataset_dir = noise_root / args.dataset / noise_group(args.noise_type) / output_name
 
     if args.overwrite and output_dataset_dir.exists():
         shutil.rmtree(output_dataset_dir)

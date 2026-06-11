@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import csv
+import shutil
 from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
 
 
-# In order to apply feature noise for the train and test datasetm, we used 3 different nose strengths for each noise type. 
-# For blur, we used a radius of 1, 2, and 3. For brightness, we used factors of 0.5, 0.75, and 1.25. For Gaussian noise, we used standard deviations of 10, 20, and 30.
-SUPPORTED_NOISE_TYPES = ("blur", "brightness", "gaussian")
+SUPPORTED_NOISE_TYPES = ("blur", "brightness", "gaussian", "label_shuffle")
 
 
 def apply_blur(image: Image.Image, radius: float) -> Image.Image:
@@ -54,6 +53,49 @@ def apply_noise(
     raise ValueError(f"Unsupported noise_type '{noise_type}'. Choose from: {supported}.")
 
 
+def shuffle_label_rows(
+    rows: list[dict[str, str]],
+    shuffle_fraction: float,
+    seed: int,
+) -> list[dict[str, str]]:
+    if not 0.0 <= shuffle_fraction <= 1.0:
+        raise ValueError("label_shuffle value must be in the range [0, 1].")
+    if not rows:
+        return rows
+
+    rng = np.random.default_rng(seed)
+    labels = sorted({row["label"] for row in rows})
+    label_to_names: dict[str, list[str]] = {}
+    for row in rows:
+        label_to_names.setdefault(row["label"], [])
+        if row["class_name"] not in label_to_names[row["label"]]:
+            label_to_names[row["label"]].append(row["class_name"])
+
+    if len(labels) < 2:
+        raise ValueError("label_shuffle requires at least two classes.")
+
+    noisy_rows = [dict(row) for row in rows]
+    num_to_shuffle = round(len(noisy_rows) * shuffle_fraction)
+    selected_indices = set(
+        rng.choice(len(noisy_rows), size=num_to_shuffle, replace=False).tolist()
+    )
+
+    for index, row in enumerate(noisy_rows):
+        row["original_label"] = row["label"]
+        row["original_class_name"] = row["class_name"]
+        row["label_noise_applied"] = int(index in selected_indices)
+        if index not in selected_indices:
+            continue
+
+        current_label = row["label"]
+        candidate_labels = [label for label in labels if label != current_label]
+        new_label = str(rng.choice(candidate_labels))
+        row["label"] = new_label
+        row["class_name"] = label_to_names[new_label][0]
+
+    return noisy_rows
+
+
 def make_noisy_dataset(
     input_dataset_dir: Path | str,
     output_dataset_dir: Path | str,
@@ -69,13 +111,12 @@ def make_noisy_dataset(
     input_dataset_dir = Path(input_dataset_dir)
     output_dataset_dir = Path(output_dataset_dir)
     input_labels_path = input_dataset_dir / "labels.csv"
-    output_images_dir = output_dataset_dir / "images"
     output_labels_path = output_dataset_dir / "labels.csv"
 
     if not input_labels_path.is_file():
         raise FileNotFoundError(f"Missing labels file: {input_labels_path}")
 
-    output_images_dir.mkdir(parents=True, exist_ok=True)
+    output_dataset_dir.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(seed)
 
     with input_labels_path.open(newline="") as input_file:
@@ -89,12 +130,27 @@ def make_noisy_dataset(
         for extra_field in ("noise_type", "noise_value"):
             if extra_field not in fieldnames:
                 fieldnames.append(extra_field)
+        rows = list(reader)
+
+        if noise_type == "label_shuffle":
+            for extra_field in (
+                "original_label",
+                "original_class_name",
+                "label_noise_applied",
+            ):
+                if extra_field not in fieldnames:
+                    fieldnames.append(extra_field)
+            rows = shuffle_label_rows(
+                rows=rows,
+                shuffle_fraction=value,
+                seed=seed,
+            )
 
         with output_labels_path.open("w", newline="") as output_file:
             writer = csv.DictWriter(output_file, fieldnames=fieldnames)
             writer.writeheader()
 
-            for row in reader:
+            for row in rows:
                 source_image_path = input_dataset_dir / row["relative_path"]
                 if not source_image_path.is_file():
                     raise FileNotFoundError(f"Missing source image: {source_image_path}")
@@ -103,14 +159,17 @@ def make_noisy_dataset(
                 output_image_path = output_dataset_dir / output_relative_path
                 output_image_path.parent.mkdir(parents=True, exist_ok=True)
 
-                with Image.open(source_image_path) as image:
-                    noisy_image = apply_noise(
-                        image=image.convert("RGB"),
-                        noise_type=noise_type,
-                        value=value,
-                        rng=rng,
-                    )
-                    noisy_image.save(output_image_path)
+                if noise_type == "label_shuffle":
+                    shutil.copy2(source_image_path, output_image_path)
+                else:
+                    with Image.open(source_image_path) as image:
+                        noisy_image = apply_noise(
+                            image=image.convert("RGB"),
+                            noise_type=noise_type,
+                            value=value,
+                            rng=rng,
+                        )
+                        noisy_image.save(output_image_path)
 
                 row["noise_type"] = noise_type
                 row["noise_value"] = value
