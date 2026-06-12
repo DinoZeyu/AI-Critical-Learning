@@ -29,5 +29,11 @@ class SimpleCNN(nn.Module):
             nn.Linear(256, num_classes),
         )
 
+    def forward_features(self, x):
+        return self.features(x).flatten(1)
+
+    def forward_logits_from_features(self, features):
+        return self.classifier(features)
+
     def forward(self, x):
-        return self.classifier(self.features(x))
+        return self.forward_logits_from_features(self.forward_features(x))

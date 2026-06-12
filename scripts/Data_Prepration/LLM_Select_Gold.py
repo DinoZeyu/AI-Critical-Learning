@@ -72,6 +72,34 @@ def parse_args() -> argparse.Namespace:
         help="Minimum data_reliance score required for gold data.",
     )
     parser.add_argument(
+        "--min-gold-per-class",
+        type=int,
+        default=0,
+        help=(
+            "Optional minimum selected gold rows per class. If the primary "
+            "quality threshold selects too few rows, the script supplements "
+            "from each class's top-scoring annotations."
+        ),
+    )
+    parser.add_argument(
+        "--fill-target-shortfall",
+        action="store_true",
+        help=(
+            "If the primary quality threshold selects fewer than the class "
+            "target count, supplement up to that target using top-scoring "
+            "fallback rows that pass --fallback-quality-threshold."
+        ),
+    )
+    parser.add_argument(
+        "--fallback-quality-threshold",
+        type=float,
+        default=0.0,
+        help=(
+            "Minimum data_reliance score allowed for --min-gold-per-class "
+            "fallback rows. Default 0.0 permits forced class coverage."
+        ),
+    )
+    parser.add_argument(
         "--limit",
         type=int,
         help="Annotate only the first N unprocessed rows. Useful for API smoke tests.",
@@ -122,6 +150,14 @@ def validate_args(args: argparse.Namespace) -> None:
         raise ValueError("--gold-ratio must be in the range (0, 1].")
     if not 0.0 <= args.quality_threshold <= 1.0:
         raise ValueError("--quality-threshold must be in the range [0, 1].")
+    if args.min_gold_per_class < 0:
+        raise ValueError("--min-gold-per-class cannot be negative.")
+    if not 0.0 <= args.fallback_quality_threshold <= 1.0:
+        raise ValueError("--fallback-quality-threshold must be in the range [0, 1].")
+    if args.fallback_quality_threshold > args.quality_threshold:
+        raise ValueError(
+            "--fallback-quality-threshold cannot be greater than --quality-threshold."
+        )
     if args.limit is not None and args.limit <= 0:
         raise ValueError("--limit must be a positive integer.")
     if args.sleep < 0:
@@ -337,11 +373,19 @@ def sort_gold_candidates(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         rows,
         key=lambda row: (
             float(row["data_reliance"]),
-            row["alternative_class"] is None,
+            has_no_alternative_class(row.get("alternative_class")),
             -int(row["index"]),
         ),
         reverse=True,
     )
+
+
+def has_no_alternative_class(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str) and value.strip().lower() in {"", "none", "null"}:
+        return True
+    return False
 
 
 def select_gold_rows(
@@ -349,6 +393,9 @@ def select_gold_rows(
     original_rows: list[dict[str, str]],
     gold_ratio: float,
     quality_threshold: float,
+    min_gold_per_class: int,
+    fallback_quality_threshold: float,
+    fill_target_shortfall: bool,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     target_counts = allocate_target_counts(original_rows, gold_ratio=gold_ratio)
     annotated_by_label = rows_by_label(annotations)
@@ -364,6 +411,36 @@ def select_gold_rows(
             if float(row["data_reliance"]) >= quality_threshold
         ]
         selected = sort_gold_candidates(above_threshold)[:target_count]
+        selected_paths = {row["relative_path"] for row in selected}
+        target_fallback_selected_count = 0
+        if fill_target_shortfall and len(selected) < target_count:
+            fallback_pool = [
+                row
+                for row in class_annotations
+                if row["relative_path"] not in selected_paths
+                and float(row["data_reliance"]) >= fallback_quality_threshold
+            ]
+            fallback_rows = sort_gold_candidates(fallback_pool)[
+                : target_count - len(selected)
+            ]
+            selected.extend(fallback_rows)
+            selected_paths.update(row["relative_path"] for row in fallback_rows)
+            target_fallback_selected_count = len(fallback_rows)
+
+        minimum_count = min(min_gold_per_class, len(class_annotations))
+        fallback_selected_count = 0
+        if len(selected) < minimum_count:
+            fallback_pool = [
+                row
+                for row in class_annotations
+                if row["relative_path"] not in selected_paths
+                and float(row["data_reliance"]) >= fallback_quality_threshold
+            ]
+            fallback_rows = sort_gold_candidates(fallback_pool)[
+                : minimum_count - len(selected)
+            ]
+            selected.extend(fallback_rows)
+            fallback_selected_count = len(fallback_rows)
         gold_rows.extend(selected)
 
         class_name = selected[0]["class_name"] if selected else None
@@ -376,9 +453,15 @@ def select_gold_rows(
                 "class_name": class_name,
                 "annotated_count": len(class_annotations),
                 "target_gold_count": target_count,
+                "min_gold_per_class": min_gold_per_class,
                 "above_threshold_count": len(above_threshold),
+                "fill_target_shortfall": fill_target_shortfall,
+                "fallback_quality_threshold": f"{fallback_quality_threshold:.2f}",
+                "target_fallback_selected_count": target_fallback_selected_count,
+                "fallback_selected_count": fallback_selected_count,
                 "selected_count": len(selected),
                 "shortfall_count": max(target_count - len(selected), 0),
+                "minimum_shortfall_count": max(minimum_count - len(selected), 0),
                 "quality_threshold": f"{quality_threshold:.2f}",
             }
         )
@@ -565,6 +648,9 @@ def main() -> None:
         original_rows=rows,
         gold_ratio=args.gold_ratio,
         quality_threshold=args.quality_threshold,
+        min_gold_per_class=args.min_gold_per_class,
+        fallback_quality_threshold=args.fallback_quality_threshold,
+        fill_target_shortfall=args.fill_target_shortfall,
     )
     write_selection_outputs(
         dataset_dir=dataset_dir,

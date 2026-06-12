@@ -12,7 +12,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, Subset
 from torchvision import transforms
 from tqdm import tqdm
 
@@ -28,6 +28,7 @@ from cl.model import SimpleCNN
 IMAGE_DATA_DIR = REPO_ROOT / "Image_Data"
 TRAIN_CLEAN_DIR = IMAGE_DATA_DIR / "Train_Clean_Data"
 TEST_CLEAN_DIR = IMAGE_DATA_DIR / "Test_Clean_Data"
+GOLD_DATA_DIR = IMAGE_DATA_DIR / "Gold_Data"
 RESULTS_ROOT = REPO_ROOT / "Experiments_Results"
 DEFAULT_LABELS_FILENAME = "labels.csv"
 WITH_GOLD_LABELS_FILENAME = "labels_before_gold_split.csv"
@@ -102,11 +103,66 @@ def parse_args() -> argparse.Namespace:
         help="Testing labels filename inside --test-dir.",
     )
     parser.add_argument(
+        "--val-dir",
+        type=Path,
+        help=(
+            "Clean validation dataset directory for selected-epoch reporting. Defaults "
+            "to Image_Data/Gold_Data/<dataset>, matching gold-guided runs."
+        ),
+    )
+    parser.add_argument(
+        "--val-labels-filename",
+        default=DEFAULT_LABELS_FILENAME,
+        help="Validation labels filename inside --val-dir.",
+    )
+    parser.add_argument(
+        "--val-fraction",
+        type=float,
+        default=0.1,
+        help=(
+            "Fraction of --val-dir held out as clean validation for selected-epoch reporting "
+            "and early stopping. The split is stratified and seed-controlled."
+        ),
+    )
+    parser.add_argument(
+        "--selection-metric",
+        choices=("val-accuracy", "val-loss"),
+        default="val-accuracy",
+        help=(
+            "Validation metric used for selected-epoch reporting and early "
+            "stopping. The diagnostic peak-test epoch is always tracked separately."
+        ),
+    )
+    parser.add_argument(
+        "--early-stop-patience",
+        type=int,
+        default=0,
+        help=(
+            "Stop after this many epochs without validation metric improvement. "
+            "Default 0 disables early stopping."
+        ),
+    )
+    parser.add_argument(
+        "--early-stop-min-delta",
+        type=float,
+        default=0.0,
+        help="Minimum validation metric improvement required to reset early stopping.",
+    )
+    parser.add_argument(
+        "--save-checkpoints",
+        action="store_true",
+        help=(
+            "Save baseline model.pt and model_peak_test.pt. Disabled by default "
+            "because baseline runs are for comparison metrics, not model reuse."
+        ),
+    )
+    parser.add_argument(
         "--include-gold-in-train",
         action="store_true",
         help=(
             "For clean train dirs, train with labels_before_gold_split.csv instead "
-            "of labels.csv. This does not read Gold_Data."
+            "of labels.csv. Gold_Data is still only used for validation unless "
+            "--val-dir is changed."
         ),
     )
     parser.add_argument(
@@ -155,6 +211,12 @@ def validate_args(args: argparse.Namespace) -> None:
         raise ValueError("--weight-decay cannot be negative.")
     if args.num_workers < 0:
         raise ValueError("--num-workers cannot be negative.")
+    if not 0.0 < args.val_fraction < 0.5:
+        raise ValueError("--val-fraction must be in (0, 0.5).")
+    if args.early_stop_patience < 0:
+        raise ValueError("--early-stop-patience cannot be negative.")
+    if args.early_stop_min_delta < 0:
+        raise ValueError("--early-stop-min-delta cannot be negative.")
     if args.image_size is not None and args.image_size <= 0:
         raise ValueError("--image-size must be positive.")
     if args.include_gold_in_train and args.train_labels_filename is not None:
@@ -219,6 +281,12 @@ def resolve_test_dir(dataset: str, test_dir: Path | None) -> Path:
     return TEST_CLEAN_DIR / dataset
 
 
+def resolve_val_dir(dataset: str, val_dir: Path | None) -> Path:
+    if val_dir is not None:
+        return resolve_repo_path(val_dir)
+    return GOLD_DATA_DIR / dataset
+
+
 def resolve_train_labels_filename(args: argparse.Namespace) -> str:
     if args.train_labels_filename is not None:
         return args.train_labels_filename
@@ -254,19 +322,69 @@ def infer_num_classes(*row_groups: list[dict[str, str]]) -> int:
     return max(labels) + 1
 
 
+def stratified_validation_split(
+    rows: list[dict[str, str]],
+    val_fraction: float,
+    seed: int,
+) -> tuple[list[int], list[int]]:
+    indices_by_label: dict[int, list[int]] = {}
+    for index, row in enumerate(rows):
+        indices_by_label.setdefault(int(row["label"]), []).append(index)
+
+    rng = random.Random(seed)
+    train_indices = []
+    val_indices = []
+    for label_indices in indices_by_label.values():
+        shuffled = label_indices[:]
+        rng.shuffle(shuffled)
+        val_count = max(1, round(len(shuffled) * val_fraction))
+        val_count = min(val_count, len(shuffled) - 1) if len(shuffled) > 1 else 0
+        val_indices.extend(shuffled[:val_count])
+        train_indices.extend(shuffled[val_count:])
+
+    rng.shuffle(train_indices)
+    rng.shuffle(val_indices)
+    if not val_indices:
+        raise ValueError("Validation split is empty; increase --val-fraction or gold data.")
+    return train_indices, val_indices
+
+
+def rows_for_indices(
+    rows: list[dict[str, str]],
+    indices: list[int],
+) -> list[dict[str, str]]:
+    return [rows[index] for index in indices]
+
+
 def make_dataloaders(
     train_dir: Path,
+    val_dir: Path,
     test_dir: Path,
     train_labels_filename: str,
+    val_labels_filename: str,
     test_labels_filename: str,
     batch_size: int,
     num_workers: int,
     image_size: int,
-) -> tuple[DataLoader, DataLoader, list[dict[str, str]], list[dict[str, str]]]:
+    val_fraction: float,
+    seed: int,
+) -> tuple[
+    DataLoader,
+    DataLoader,
+    DataLoader,
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+]:
     transform = build_transform(image_size)
     train_dataset = CsvImageDataset(
         train_dir,
         labels_filename=train_labels_filename,
+        transform=transform,
+    )
+    val_dataset = CsvImageDataset(
+        val_dir,
+        labels_filename=val_labels_filename,
         transform=transform,
     )
     test_dataset = CsvImageDataset(
@@ -274,11 +392,25 @@ def make_dataloaders(
         labels_filename=test_labels_filename,
         transform=transform,
     )
+    val_source_rows = val_dataset.rows
+    _, val_indices = stratified_validation_split(
+        rows=val_source_rows,
+        val_fraction=val_fraction,
+        seed=seed,
+    )
+    val_rows = rows_for_indices(val_source_rows, val_indices)
 
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
         shuffle=True,
+        num_workers=num_workers,
+        pin_memory=torch.cuda.is_available(),
+    )
+    val_loader = DataLoader(
+        Subset(val_dataset, val_indices),
+        batch_size=batch_size,
+        shuffle=False,
         num_workers=num_workers,
         pin_memory=torch.cuda.is_available(),
     )
@@ -289,7 +421,14 @@ def make_dataloaders(
         num_workers=num_workers,
         pin_memory=torch.cuda.is_available(),
     )
-    return train_loader, test_loader, train_dataset.rows, test_dataset.rows
+    return (
+        train_loader,
+        val_loader,
+        test_loader,
+        train_dataset.rows,
+        val_rows,
+        test_dataset.rows,
+    )
 
 
 def source_group(path: Path, split: str) -> str:
@@ -451,14 +590,29 @@ def save_outputs(
     history: list[dict[str, Any]],
     metrics: dict[str, Any],
     per_class_rows: list[dict[str, Any]],
+    peak_test_state: dict[str, torch.Tensor] | None,
+    peak_test_per_class_rows: list[dict[str, Any]],
+    save_checkpoints: bool,
 ) -> None:
     run_dir.mkdir(parents=True, exist_ok=True)
-    torch.save(model.state_dict(), run_dir / "model.pt")
+    if save_checkpoints:
+        torch.save(model.state_dict(), run_dir / "model.pt")
+    if save_checkpoints and peak_test_state is not None:
+        torch.save(peak_test_state, run_dir / "model_peak_test.pt")
     write_csv(run_dir / "history.csv", history)
     write_csv(run_dir / "per_class_accuracy.csv", per_class_rows)
+    write_csv(run_dir / "per_class_accuracy_selected.csv", per_class_rows)
+    write_csv(run_dir / "per_class_accuracy_peak_test.csv", peak_test_per_class_rows)
     (run_dir / "metrics.json").write_text(
         json.dumps(metrics, indent=2, ensure_ascii=False) + "\n"
     )
+
+
+def clone_state_dict(model: nn.Module) -> dict[str, torch.Tensor]:
+    return {
+        key: value.detach().cpu().clone()
+        for key, value in model.state_dict().items()
+    }
 
 
 def main() -> None:
@@ -467,21 +621,26 @@ def main() -> None:
     set_seed(args.seed)
 
     train_dir = resolve_train_dir(args.dataset, args.train_dir)
+    val_dir = resolve_val_dir(args.dataset, args.val_dir)
     test_dir = resolve_test_dir(args.dataset, args.test_dir)
     train_labels_filename = resolve_train_labels_filename(args)
     image_size = resolve_image_size(args.dataset, args.image_size)
 
-    train_loader, test_loader, train_rows, test_rows = make_dataloaders(
+    train_loader, val_loader, test_loader, train_rows, val_rows, test_rows = make_dataloaders(
         train_dir=train_dir,
+        val_dir=val_dir,
         test_dir=test_dir,
         train_labels_filename=train_labels_filename,
+        val_labels_filename=args.val_labels_filename,
         test_labels_filename=args.test_labels_filename,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         image_size=image_size,
+        val_fraction=args.val_fraction,
+        seed=args.seed,
     )
 
-    num_classes = infer_num_classes(train_rows, test_rows)
+    num_classes = infer_num_classes(train_rows, val_rows, test_rows)
     device = torch.device(args.device)
     model = SimpleCNN(num_classes=num_classes).to(device)
     criterion = nn.CrossEntropyLoss()
@@ -500,10 +659,21 @@ def main() -> None:
         run_name=args.run_name,
     )
     history = []
-    best_test_accuracy = -1.0
+    best_validation_accuracy = -1.0
+    best_validation_loss = float("inf")
+    test_accuracy_at_best_validation = -1.0
+    test_loss_at_best_validation = float("inf")
     best_state = None
     best_epoch = 0
     last_per_class_rows = []
+    best_per_class_rows = []
+    epochs_without_improvement = 0
+    stopped_epoch = 0
+    max_test_accuracy = -1.0
+    max_test_loss_at_peak = float("inf")
+    max_test_epoch = 0
+    peak_test_state = None
+    peak_test_per_class_rows = []
 
     for epoch in range(1, args.epochs + 1):
         train_loss, train_accuracy = train_one_epoch(
@@ -513,6 +683,13 @@ def main() -> None:
             optimizer=optimizer,
             device=device,
             epoch=epoch,
+        )
+        val_loss, val_accuracy, _ = evaluate(
+            model=model,
+            loader=val_loader,
+            criterion=criterion,
+            device=device,
+            num_classes=num_classes,
         )
         test_loss, test_accuracy, per_class_rows = evaluate(
             model=model,
@@ -526,6 +703,8 @@ def main() -> None:
             "epoch": epoch,
             "train_loss": train_loss,
             "train_accuracy": train_accuracy,
+            "val_loss": val_loss,
+            "val_accuracy": val_accuracy,
             "test_loss": test_loss,
             "test_accuracy": test_accuracy,
         }
@@ -534,16 +713,50 @@ def main() -> None:
         print(
             f"epoch={epoch} "
             f"train_loss={train_loss:.4f} train_acc={train_accuracy:.4f} "
+            f"val_loss={val_loss:.4f} val_acc={val_accuracy:.4f} "
             f"test_loss={test_loss:.4f} test_acc={test_accuracy:.4f}"
         )
 
-        if test_accuracy > best_test_accuracy:
-            best_test_accuracy = test_accuracy
+        if test_accuracy > max_test_accuracy:
+            max_test_accuracy = test_accuracy
+            max_test_loss_at_peak = test_loss
+            max_test_epoch = epoch
+            peak_test_per_class_rows = per_class_rows
+            peak_test_state = clone_state_dict(model)
+
+        if args.selection_metric == "val-accuracy":
+            metric_improved = (
+                val_accuracy > best_validation_accuracy + args.early_stop_min_delta
+            )
+        else:
+            metric_improved = val_loss < best_validation_loss - args.early_stop_min_delta
+
+        if metric_improved:
+            best_validation_accuracy = val_accuracy
+            best_validation_loss = val_loss
+            test_accuracy_at_best_validation = test_accuracy
+            test_loss_at_best_validation = test_loss
             best_epoch = epoch
-            best_state = {
-                key: value.detach().cpu().clone()
-                for key, value in model.state_dict().items()
-            }
+            best_per_class_rows = per_class_rows
+            epochs_without_improvement = 0
+            best_state = clone_state_dict(model)
+        else:
+            epochs_without_improvement += 1
+
+        if (
+            args.early_stop_patience > 0
+            and epochs_without_improvement >= args.early_stop_patience
+        ):
+            stopped_epoch = epoch
+            print(
+                f"Early stopping baseline at epoch={epoch}; "
+                f"selection_metric={args.selection_metric} "
+                f"selected_epoch={best_epoch} "
+                f"selected_val_loss={best_validation_loss:.4f} "
+                f"best_val_acc={best_validation_accuracy:.4f} "
+                f"test_acc_at_selected={test_accuracy_at_best_validation:.4f}"
+            )
+            break
 
     if best_state is not None:
         model.load_state_dict(best_state)
@@ -552,29 +765,64 @@ def main() -> None:
         "dataset": args.dataset,
         "num_classes": num_classes,
         "train_dir": str(train_dir),
+        "val_dir": str(val_dir),
         "test_dir": str(test_dir),
         "train_labels_file": str(train_dir / train_labels_filename),
+        "val_labels_file": str(val_dir / args.val_labels_filename),
         "test_labels_file": str(test_dir / args.test_labels_filename),
         "include_gold_in_train": args.include_gold_in_train,
         "train_examples": len(train_rows),
+        "validation_examples": len(val_rows),
+        "validation_source": "gold_data_stratified_split",
+        "validation_fraction": args.val_fraction,
         "test_examples": len(test_rows),
         "epochs": args.epochs,
         "batch_size": args.batch_size,
         "image_size": image_size,
         "lr": args.lr,
         "weight_decay": args.weight_decay,
+        "selection_metric": args.selection_metric,
+        "selected_epoch_policy": f"best_clean_validation_{args.selection_metric}",
+        "selected_checkpoint_policy": (
+            f"best_clean_validation_{args.selection_metric}"
+            if args.save_checkpoints
+            else None
+        ),
+        "checkpoints_saved": args.save_checkpoints,
+        "early_stop_patience": args.early_stop_patience,
+        "early_stop_min_delta": args.early_stop_min_delta,
+        "early_stopped": stopped_epoch > 0,
+        "stopped_epoch": stopped_epoch,
         "seed": args.seed,
         "device": str(device),
-        "best_epoch": best_epoch,
-        "best_test_accuracy": best_test_accuracy,
+        "selected_epoch": best_epoch,
+        "selected_validation_loss": best_validation_loss,
+        "best_validation_accuracy": best_validation_accuracy,
+        "test_loss_at_selected_epoch": test_loss_at_best_validation,
+        "test_accuracy_at_selected_epoch": test_accuracy_at_best_validation,
+        "peak_test_checkpoint_policy": "diagnostic_oracle_best_clean_test_accuracy",
+        "max_test_accuracy_observed": max_test_accuracy,
+        "max_test_loss_at_peak": max_test_loss_at_peak,
+        "max_test_epoch_observed": max_test_epoch,
+        "selected_checkpoint": str(run_dir / "model.pt") if args.save_checkpoints else None,
+        "peak_test_checkpoint": (
+            str(run_dir / "model_peak_test.pt") if args.save_checkpoints else None
+        ),
+        "best_epoch": max_test_epoch,
+        "best_test_accuracy": max_test_accuracy,
+        "best_test_epoch": max_test_epoch,
         "final_test_accuracy": history[-1]["test_accuracy"],
+        "final_test_loss": history[-1]["test_loss"],
     }
     save_outputs(
         run_dir=run_dir,
         model=model,
         history=history,
         metrics=metrics,
-        per_class_rows=last_per_class_rows,
+        per_class_rows=best_per_class_rows or last_per_class_rows,
+        peak_test_state=peak_test_state,
+        peak_test_per_class_rows=peak_test_per_class_rows,
+        save_checkpoints=args.save_checkpoints,
     )
     print(f"Saved baseline outputs to {run_dir}")
 
