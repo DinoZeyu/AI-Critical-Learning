@@ -199,6 +199,11 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset STL --mixed-train-dir 
 # STL train label noise -> clean test with gold-guided critical learning.
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL --mixed-train-dir Image_Data/Train_Noise_Data/STL/label_noise/label_shuffle_0p2
 
+# Current selected STL label-noise setting from the completed sweep.
+# This value is an experiment-selected hyperparameter, not a fixed method default.
+# The result folder is aligned with docs/stl_label_shuffle_0p2_results.md.
+python scripts/Gold_Guided_Critical_Learning.py --dataset STL --mixed-train-dir Image_Data/Train_Noise_Data/STL/label_noise/label_shuffle_0p2 --early-stop-patience 3 --selection-metric val-loss --beta 0.5 --lambda-gold 0.25 --run-name label_noise/label_shuffle/label_shuffle_0p2_method_beta05_lg025
+
 # Flower_102 train feature noise -> clean test with gold-guided critical learning.
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/blur_3p0 --early-stop-patience 3
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/brightness_0p75 --early-stop-patience 3
