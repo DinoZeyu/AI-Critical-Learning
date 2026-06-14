@@ -494,6 +494,9 @@ def build_run_dir(
             train_labels_filename=train_labels_filename,
         )
     )
+    if experiment_group == "Train_Clean_Test_Clean":
+        run_dir = resolve_repo_path(results_root) / experiment_group / dataset
+        return run_dir if leaf_path == Path("clean") else run_dir / leaf_path
     return resolve_repo_path(results_root) / experiment_group / "Baseline_Exp" / dataset / leaf_path
 
 
