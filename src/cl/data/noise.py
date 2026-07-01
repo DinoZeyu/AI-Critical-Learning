@@ -8,7 +8,8 @@ import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
 
 
-SUPPORTED_NOISE_TYPES = ("blur", "brightness", "gaussian", "label_shuffle")
+FEATURE_NOISE_TYPES = ("blur", "brightness", "gaussian")
+SUPPORTED_NOISE_TYPES = (*FEATURE_NOISE_TYPES, "label_shuffle")
 
 
 def apply_blur(image: Image.Image, radius: float) -> Image.Image:
@@ -173,4 +174,94 @@ def make_noisy_dataset(
 
                 row["noise_type"] = noise_type
                 row["noise_value"] = value
+                writer.writerow(row)
+
+
+def make_hybrid_noisy_dataset(
+    input_dataset_dir: Path | str,
+    output_dataset_dir: Path | str,
+    feature_noise_type: str,
+    feature_noise_value: float,
+    label_shuffle_fraction: float,
+    seed: int = 42,
+    label_seed: int | None = None,
+) -> None:
+    """Create a noisy dataset with feature corruption and label shuffle.
+
+    The feature corruption is applied to every image. The label shuffle is applied
+    to the requested fraction of rows after reading the clean labels.
+    """
+    if feature_noise_type not in FEATURE_NOISE_TYPES:
+        supported = ", ".join(FEATURE_NOISE_TYPES)
+        raise ValueError(
+            f"Unsupported feature_noise_type '{feature_noise_type}'. "
+            f"Choose from: {supported}."
+        )
+
+    input_dataset_dir = Path(input_dataset_dir)
+    output_dataset_dir = Path(output_dataset_dir)
+    input_labels_path = input_dataset_dir / "labels.csv"
+    output_labels_path = output_dataset_dir / "labels.csv"
+
+    if not input_labels_path.is_file():
+        raise FileNotFoundError(f"Missing labels file: {input_labels_path}")
+
+    output_dataset_dir.mkdir(parents=True, exist_ok=True)
+    feature_rng = np.random.default_rng(seed)
+    effective_label_seed = seed if label_seed is None else label_seed
+
+    with input_labels_path.open(newline="") as input_file:
+        reader = csv.DictReader(input_file)
+        if reader.fieldnames is None:
+            raise ValueError(f"labels.csv has no header: {input_labels_path}")
+        if "relative_path" not in reader.fieldnames:
+            raise ValueError(f"labels.csv must include relative_path: {input_labels_path}")
+
+        fieldnames = list(reader.fieldnames)
+        for extra_field in (
+            "noise_type",
+            "feature_noise_type",
+            "feature_noise_value",
+            "label_noise_type",
+            "label_noise_value",
+            "original_label",
+            "original_class_name",
+            "label_noise_applied",
+        ):
+            if extra_field not in fieldnames:
+                fieldnames.append(extra_field)
+
+        rows = shuffle_label_rows(
+            rows=list(reader),
+            shuffle_fraction=label_shuffle_fraction,
+            seed=effective_label_seed,
+        )
+
+        with output_labels_path.open("w", newline="") as output_file:
+            writer = csv.DictWriter(output_file, fieldnames=fieldnames)
+            writer.writeheader()
+
+            for row in rows:
+                source_image_path = input_dataset_dir / row["relative_path"]
+                if not source_image_path.is_file():
+                    raise FileNotFoundError(f"Missing source image: {source_image_path}")
+
+                output_relative_path = Path(row["relative_path"])
+                output_image_path = output_dataset_dir / output_relative_path
+                output_image_path.parent.mkdir(parents=True, exist_ok=True)
+
+                with Image.open(source_image_path) as image:
+                    noisy_image = apply_noise(
+                        image=image.convert("RGB"),
+                        noise_type=feature_noise_type,
+                        value=feature_noise_value,
+                        rng=feature_rng,
+                    )
+                    noisy_image.save(output_image_path)
+
+                row["noise_type"] = "hybrid_noise"
+                row["feature_noise_type"] = feature_noise_type
+                row["feature_noise_value"] = feature_noise_value
+                row["label_noise_type"] = "label_shuffle"
+                row["label_noise_value"] = label_shuffle_fraction
                 writer.writerow(row)

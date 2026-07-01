@@ -31,6 +31,14 @@ python scripts/Data_Prepration/make_noisy_data.py --dataset STL --split train --
 python scripts/Data_Prepration/make_noisy_data.py --dataset STL --split train --noise-type label_shuffle --value 0.2 --overwrite
 ```
 
+Hybrid feature+label noisy train data:
+
+```bash
+python scripts/Data_Prepration/make_hybrid_noisy_data.py --dataset STL --split train --feature-noise-type blur --feature-value 3 --label-shuffle-fraction 0.2 --overwrite
+python scripts/Data_Prepration/make_hybrid_noisy_data.py --dataset STL --split train --feature-noise-type brightness --feature-value 0.75 --label-shuffle-fraction 0.2 --overwrite
+python scripts/Data_Prepration/make_hybrid_noisy_data.py --dataset STL --split train --feature-noise-type gaussian --feature-value 30 --label-shuffle-fraction 0.2 --overwrite
+```
+
 ## Gold Evaluator
 
 Current STL evaluator command:
