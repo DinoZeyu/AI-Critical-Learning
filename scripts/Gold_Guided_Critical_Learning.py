@@ -37,7 +37,7 @@ IMAGE_DATA_DIR = REPO_ROOT / "Image_Data"
 GOLD_DATA_DIR = IMAGE_DATA_DIR / "Gold_Data"
 TEST_CLEAN_DIR = IMAGE_DATA_DIR / "Test_Clean_Data"
 RESULTS_ROOT = REPO_ROOT / "Experiments_Results"
-GOLD_EVALUATOR_ROOT = REPO_ROOT / "Evaluators"
+GOLD_EVALUATOR_ROOT = REPO_ROOT / "Gold_Evaluators"
 DEFAULT_LABELS_FILENAME = "labels.csv"
 DEFAULT_IMAGE_SIZES = {
     "STL": 96,
@@ -86,7 +86,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help=(
             "Frozen gold evaluator checkpoint. Defaults to "
-            "Evaluators/<dataset>/model.pt."
+            "Gold_Evaluators/<dataset>/model.pt."
         ),
     )
     parser.add_argument(

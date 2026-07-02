@@ -28,7 +28,7 @@ from cl.model import SimpleCNN  # noqa: E402
 
 IMAGE_DATA_DIR = REPO_ROOT / "Image_Data"
 GOLD_DATA_DIR = IMAGE_DATA_DIR / "Gold_Data"
-EVALUATORS_ROOT = REPO_ROOT / "Evaluators"
+EVALUATORS_ROOT = REPO_ROOT / "Gold_Evaluators"
 DEFAULT_LABELS_FILENAME = "labels.csv"
 DEFAULT_IMAGE_SIZES = {
     "STL": 96,

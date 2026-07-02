@@ -55,7 +55,7 @@ python scripts/Train_Gold_Evaluator.py --dataset STL \
 
 Current saved evaluator summary:
 
-- Path: `Evaluators/STL/model.pt`
+- Path: `Gold_Evaluators/STL/model.pt`
 - Best epoch: `12`
 - Gold validation loss: `0.8012`
 - Gold validation accuracy: `0.7323`
@@ -189,12 +189,115 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
   --run-name label_noise/label_shuffle/label_shuffle_0p2_method_beta05_lg025
 ```
 
+## STL Hybrid Gold-Guided CL Seeded Sweep
+
+These hybrid commands use the best single-noise STL parameters as anchors:
+the corresponding feature-noise best setting, the label-noise best setting,
+and one compromise setting. The gold evaluator checkpoint is passed explicitly
+for reproducibility.
+
+Blur + label shuffle:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --mixed-train-dir Image_Data/Train_Noise_Data/STL/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.90 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_feature_best_beta09_lg015
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --mixed-train-dir Image_Data/Train_Noise_Data/STL/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.50 \
+  --lambda-gold 0.25 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_label_best_beta05_lg025
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --mixed-train-dir Image_Data/Train_Noise_Data/STL/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.90 \
+  --lambda-gold 0.20 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_compromise_beta09_lg02
+```
+
+Brightness + label shuffle:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --mixed-train-dir Image_Data/Train_Noise_Data/STL/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.90 \
+  --lambda-gold 0.10 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_feature_best_beta09_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --mixed-train-dir Image_Data/Train_Noise_Data/STL/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.50 \
+  --lambda-gold 0.25 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_label_best_beta05_lg025
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --mixed-train-dir Image_Data/Train_Noise_Data/STL/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.90 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_compromise_beta09_lg015
+```
+
+Gaussian + label shuffle:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --mixed-train-dir Image_Data/Train_Noise_Data/STL/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.50 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_feature_best_beta05_lg015
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --mixed-train-dir Image_Data/Train_Noise_Data/STL/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.50 \
+  --lambda-gold 0.25 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_label_best_beta05_lg025
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --mixed-train-dir Image_Data/Train_Noise_Data/STL/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.50 \
+  --lambda-gold 0.20 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_compromise_beta05_lg02
+```
+
 Result summaries:
 
-- [Blur results](stl_blur_3p0_results.md)
-- [Brightness results](stl_brightness_0p75_results.md)
-- [Gaussian results](stl_gaussian_30p0_results.md)
-- [Label shuffle results](stl_label_shuffle_0p2_results.md)
+- [Blur results](feature_noise/stl_blur_3p0_results.md)
+- [Brightness results](feature_noise/stl_brightness_0p75_results.md)
+- [Gaussian results](feature_noise/stl_gaussian_30p0_results.md)
+- [Label shuffle results](label_noise/stl_label_shuffle_0p2_results.md)
+- [Blur + label shuffle hybrid results](hybrid_noise/stl_blur_3p0_label_shuffle_0p2_results.md)
+- [Brightness + label shuffle hybrid results](hybrid_noise/stl_brightness_0p75_label_shuffle_0p2_results.md)
+- [Gaussian + label shuffle hybrid results](hybrid_noise/stl_gaussian_30p0_label_shuffle_0p2_results.md)
 
 ## Optional STL Ablations
 

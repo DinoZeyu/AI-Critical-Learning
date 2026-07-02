@@ -54,7 +54,7 @@ python scripts/Train_Gold_Evaluator.py --dataset Flower_102 \
 
 Current saved evaluator summary:
 
-- Path: `Evaluators/Flower_102/model.pt`
+- Path: `Gold_Evaluators/Flower_102/model.pt`
 - Best epoch: `33`
 - Gold validation loss: `2.0351`
 - Gold validation accuracy: `0.4701`
@@ -119,6 +119,28 @@ Label-noise baseline:
 ```bash
 python scripts/Baseline_Exp.py --dataset Flower_102 \
   --train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
+  --test-dir Image_Data/Test_Clean_Data/Flower_102 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss
+```
+
+Hybrid-noise baselines:
+
+```bash
+python scripts/Baseline_Exp.py --dataset Flower_102 \
+  --train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --test-dir Image_Data/Test_Clean_Data/Flower_102 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss
+
+python scripts/Baseline_Exp.py --dataset Flower_102 \
+  --train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --test-dir Image_Data/Test_Clean_Data/Flower_102 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss
+
+python scripts/Baseline_Exp.py --dataset Flower_102 \
+  --train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --test-dir Image_Data/Test_Clean_Data/Flower_102 \
   --early-stop-patience 3 \
   --selection-metric val-loss
@@ -413,3 +435,275 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --lambda-gold 0.1 \
   --run-name label_noise/label_shuffle/label_shuffle_0p2_method_beta095_lg01
 ```
+
+## Hybrid Gold-Guided CL
+
+Blur hybrid sweep:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.8 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_feature_best_beta08_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.95 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_label_best_beta095_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.9 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_compromise_beta09_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.7 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_beta07_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.75 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_beta075_lg01
+```
+
+Blur hybrid lambda sweep around `beta=0.80`:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.8 \
+  --lambda-gold 0.05 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_beta08_lg005
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.8 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_beta08_lg015
+```
+
+Current blur hybrid selected best:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.7 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_beta07_lg01
+```
+
+Brightness hybrid sweep:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.8 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_feature_best_beta08_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.95 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_label_best_beta095_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.9 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_compromise_beta09_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.7 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_beta07_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.85 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_beta085_lg01
+```
+
+Brightness hybrid local sweep:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.75 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_beta075_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.78 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_beta078_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.8 \
+  --lambda-gold 0.05 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_beta08_lg005
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.8 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_beta08_lg015
+```
+
+Current brightness hybrid selected best:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.8 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_feature_best_beta08_lg01
+```
+
+Gaussian hybrid sweep:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.5 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_feature_best_beta05_lg015
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.6 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta06_lg015
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.7 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_compromise_beta07_lg015
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.8 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta08_lg015
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.95 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_label_best_beta095_lg01
+```
+
+Gaussian hybrid local sweep:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.5 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta05_lg01
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.5 \
+  --lambda-gold 0.2 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta05_lg02
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.45 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta045_lg015
+
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.55 \
+  --lambda-gold 0.15 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta055_lg015
+```
+
+Current gaussian hybrid selected best:
+
+```bash
+python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
+  --early-stop-patience 3 \
+  --selection-metric val-loss \
+  --beta 0.5 \
+  --lambda-gold 0.1 \
+  --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta05_lg01
+```
+
+Result summaries:
+
+- `docs/Flower_102/feature_noise/flower_blur_3p0_results.md`
+- `docs/Flower_102/feature_noise/flower_brightness_0p75_results.md`
+- `docs/Flower_102/feature_noise/flower_gaussian_30p0_results.md`
+- `docs/Flower_102/label_noise/flower_label_shuffle_0p2_results.md`
+- `docs/Flower_102/hybrid_noise/flower_blur_3p0_label_shuffle_0p2_results.md`
+- `docs/Flower_102/hybrid_noise/flower_brightness_0p75_label_shuffle_0p2_results.md`
+- `docs/Flower_102/hybrid_noise/flower_gaussian_30p0_label_shuffle_0p2_results.md`
