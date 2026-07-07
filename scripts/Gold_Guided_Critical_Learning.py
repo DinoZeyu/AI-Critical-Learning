@@ -43,6 +43,13 @@ DEFAULT_IMAGE_SIZES = {
     "STL": 96,
     "Flower_102": 224,
 }
+IMAGE_DATA_ROOT_NAMES = {
+    "Train_Clean_Data",
+    "Test_Clean_Data",
+    "Train_Noise_Data",
+    "Test_Noise_Data",
+    "Gold_Data",
+}
 
 
 class CsvImageDataset(Dataset):
@@ -347,6 +354,28 @@ def resolve_repo_path(path: Path) -> Path:
     return REPO_ROOT / path
 
 
+def image_data_relative_parts(path: Path) -> tuple[str, ...] | None:
+    resolved_path = path.resolve()
+    try:
+        return resolved_path.relative_to(IMAGE_DATA_DIR.resolve()).parts
+    except ValueError:
+        pass
+
+    try:
+        repo_relative_parts = resolved_path.relative_to(REPO_ROOT.resolve()).parts
+    except ValueError:
+        return None
+
+    if "Image_Data" not in repo_relative_parts:
+        for index, part in enumerate(repo_relative_parts):
+            if part in IMAGE_DATA_ROOT_NAMES:
+                return repo_relative_parts[index:]
+        return None
+
+    image_data_index = repo_relative_parts.index("Image_Data")
+    return repo_relative_parts[image_data_index + 1 :]
+
+
 def resolve_gold_dir(dataset: str, gold_dir: Path | None) -> Path:
     if gold_dir is not None:
         return resolve_repo_path(gold_dir)
@@ -489,9 +518,8 @@ def alpha_for_epoch(args: argparse.Namespace, epoch: int) -> float:
 
 
 def source_group(path: Path, split: str) -> str:
-    try:
-        relative_parts = path.resolve().relative_to(IMAGE_DATA_DIR.resolve()).parts
-    except ValueError:
+    relative_parts = image_data_relative_parts(path)
+    if relative_parts is None:
         return f"{split}_Custom"
 
     if not relative_parts:
@@ -506,12 +534,11 @@ def source_group(path: Path, split: str) -> str:
 
 
 def relative_result_path(path: Path) -> Path:
-    try:
-        relative = path.resolve().relative_to(IMAGE_DATA_DIR.resolve())
-    except ValueError:
-        relative = path.resolve().relative_to(REPO_ROOT.resolve())
+    relative_parts = image_data_relative_parts(path)
+    if relative_parts is None:
+        relative_parts = path.resolve().relative_to(REPO_ROOT.resolve()).parts
 
-    parts = list(relative.parts)
+    parts = list(relative_parts)
     if len(parts) == 2 and parts[0] in {"Train_Clean_Data", "Test_Clean_Data"}:
         return Path("clean")
     if len(parts) >= 2 and parts[0].endswith("_Data"):

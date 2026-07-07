@@ -7,6 +7,12 @@
 *.swp
 
 # =========================
+# Local agent/tooling state
+# =========================
+.agents/
+.codex/
+
+# =========================
 # Python
 # =========================
 __pycache__/
@@ -78,6 +84,19 @@ env_superpod.sh
 /.overrun_ablation_rerun_raw/
 /.remaining_overrun_ablation_rerun_raw/
 /.original_best_evaluator_rerun_raw/
+
+# Seed folders keep scripts, docs, labels, and metrics in Git.
+# Generated image pixels, checkpoints, and raw staging folders stay local.
+/seed_*/Train_Noise_Data/**/images/
+/seed_*/**/*.png
+/seed_*/**/*.jpg
+/seed_*/**/*.jpeg
+/seed_*/**/*.webp
+/seed_*/**/*.bmp
+/seed_*/**/*.gif
+/seed_*/.ggcl_raw/
+/seed_*/.noise_baseline_raw/
+/seed_*/.supplemental_ablation_raw/
 
 # Local compiled/view-only paper artifact
 /main.pdf

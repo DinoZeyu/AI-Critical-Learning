@@ -1,27 +1,59 @@
 # Experiment Commands
 
-Dataset-specific command files:
-
-- [STL commands](STL/commands.md)
-- [Flower_102 commands](Flower_102/commands.md)
-- [Supplemental ablation results](ablation/supplemental_ablation_results.md)
-
-Shared notes:
-
-- Clean-train / clean-test baselines save to `Experiments_Results/Train_Clean_Test_Clean/<dataset>/`.
-- Noisy-train / clean-test baselines save to `Experiments_Results/Train_Noise_Test_Clean/Baseline_Exp/<dataset>/...`.
-- Gold-guided critical learning runs save to `Experiments_Results/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning/<dataset>/...`.
-- Gold-guided critical learning commands should explicitly use `--gold-evaluator-checkpoint Gold_Evaluators/<dataset>/model.pt`.
-- Historical metrics that record `Evaluators/<dataset>/model.pt` refer to the same evaluator directory before it was renamed to `Gold_Evaluators/`.
-- Headline comparisons should use `test_accuracy_at_selected_epoch`, selected by clean gold validation loss unless otherwise stated.
-- `max_test_accuracy_observed` is diagnostic/oracle-style and should be used for analysis, not deployment checkpoint selection.
-
-Supplemental ablation batch:
+Use the seeded runners for all current experiments:
 
 ```bash
-./run_supplemental_ablation_experiments.sh
+bash scripts/seeded_runs/run_seed_experiments.sh 42
+bash scripts/seeded_runs/run_seed_experiments.sh 22
+bash scripts/seeded_runs/run_seed_experiments.sh 62
 ```
 
-This runs the 42 supplemental ablations: `lambda_gold=0`, `beta=0`, and
-`beta=1` across both datasets and all seven noise settings. Final results are
-stored under `Supplemental_Ablation_Results/<dataset>/<ablation>/...`.
+Run all configured seeds:
+
+```bash
+bash scripts/seeded_runs/run_all_seeds.sh
+```
+
+Run from inside a seed container:
+
+```bash
+bash seed_42/run_all_experiments.sh
+```
+
+Rerun canonical seed 42 supplemental ablations and replace the existing
+standard results:
+
+```bash
+REPLACE_EXISTING=1 bash seed_42/run_all_experiments.sh supplemental-ablation
+```
+
+Seed-owned artifacts are stored under root-level seed folders:
+
+```text
+seed_22/
+seed_42/
+seed_62/
+```
+
+Each seed folder uses the same internal layout:
+
+```text
+seed_<seed>/Train_Noise_Data/
+seed_<seed>/Gold_Evaluators/
+seed_<seed>/Experiments_Results/
+seed_<seed>/Supplemental_Ablation_Results/
+seed_<seed>/Noise_Baseline/
+seed_<seed>/docs/
+seed_<seed>/run_all_experiments.sh
+```
+
+Shared clean/gold image data remains under root-level `Image_Data/`.
+The shared train-clean/test-clean baseline results remain under root-level
+`Clean_Baseline/`.
+
+The GGCL and supplemental ablation parameter lists are stored in:
+
+```text
+scripts/seeded_runs/manifests/ggcl_seed42_runs.tsv
+scripts/seeded_runs/manifests/supplemental_ablation_seed42_runs.tsv
+```

@@ -71,6 +71,15 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--noise-data-root",
+        type=Path,
+        help=(
+            "Root directory for generated noisy split data. Defaults to "
+            "Image_Data/<Split>_Noise_Data. For seeded experiment containers, "
+            "use e.g. seed_22/Train_Noise_Data."
+        ),
+    )
+    parser.add_argument(
         "--overwrite",
         action="store_true",
         help="Delete the output dataset folder before writing.",
@@ -82,11 +91,21 @@ def format_value(value: float) -> str:
     return str(value).replace(".", "p").replace("-", "neg")
 
 
+def resolve_repo_path(path: Path) -> Path:
+    if path.is_absolute():
+        return path
+    return REPO_ROOT / path
+
+
 def main() -> None:
     args = parse_args()
 
     clean_root = IMAGE_DATA_DIR / f"{args.split.capitalize()}_Clean_Data"
-    noise_root = IMAGE_DATA_DIR / f"{args.split.capitalize()}_Noise_Data"
+    noise_root = (
+        resolve_repo_path(args.noise_data_root)
+        if args.noise_data_root is not None
+        else IMAGE_DATA_DIR / f"{args.split.capitalize()}_Noise_Data"
+    )
     input_dataset_dir = clean_root / args.dataset
 
     output_name = args.output_name
