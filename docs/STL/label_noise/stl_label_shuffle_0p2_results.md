@@ -21,7 +21,7 @@ Protocol:
 |---|---|---|---:|---:|---:|---:|---:|
 | Clean upper reference | Baseline | Clean train | 13 | 0.6931 | 0.6931 | 0.6662 | 100.0% |
 | Noise lower reference | Baseline | `label_shuffle_0p2` train | 10 | 0.6123 | 0.6123 | 0.5946 | 0.0% |
-| Best current method | Gold-guided CL, beta=0.50, lambda_gold=0.25 | `label_shuffle_0p2` train | 10 | 0.7173 | 0.7173 | 0.7038 | 130.0% |
+| Previous GGCL best | Gold-guided CL, beta=0.50, lambda_gold=0.25 | `label_shuffle_0p2` train | 10 | 0.7173 | 0.7173 | 0.7038 | 130.0% |
 
 ## Gold-Guided CL Ablations
 
@@ -40,10 +40,12 @@ Protocol:
 ## Notes
 
 - Label noise is harmful under the plain baseline: selected test accuracy drops from clean `0.6931` to label-noise `0.6123`.
-- Gold-guided CL more than closes this gap: the best run reaches `0.7173`, which is above the clean-train baseline in this STL setting.
-- The best observed setting uses `beta=0.50`, which balances gold evaluator prediction confidence and feature-prototype similarity. Pure feature similarity (`beta=0.00`) is much weaker.
+- Gold-guided CL more than closes this gap: the previous GGCL best run reaches `0.7173`, which is above the clean-train baseline in this STL setting.
+- Within the original sweep, the best observed setting uses `beta=0.50`, which balances gold evaluator prediction confidence and feature-prototype similarity. Pure feature similarity (`beta=0.00`) is much weaker.
 - A stronger gold stability anchor is beneficial for label noise. Increasing `lambda_gold` from `0.10` to `0.20` and `0.25` improves selected test accuracy, while `0.30` is too strong and hurts performance.
-- The best current setting is therefore `beta=0.50, lambda_gold=0.25`.
+- The previous GGCL best setting is therefore `beta=0.50, lambda_gold=0.25`.
+- A supplemental rerun-confirmed `beta=1.00, lambda_gold=0.25` ablation reaches `0.7177`, slightly exceeding this previous GGCL best; see `docs/ablation/supplemental_ablation_results.md`.
+- The historical `Evaluators/STL/model.pt` path in some metrics refers to the same evaluator later stored under `Gold_Evaluators/STL/model.pt`.
 - Recovery ratios above `100%` mean the method exceeds the clean-train baseline, not just recovers the label-noise damage.
 
 ## Source Result Folders
@@ -53,4 +55,6 @@ Protocol:
 | Clean baseline | `Experiments_Results/Train_Clean_Test_Clean/STL/` |
 | Label-noise baseline | `Experiments_Results/Train_Noise_Test_Clean/Baseline_Exp/STL/label_noise/label_shuffle_0p2/` |
 | Gold-guided beta=0.50, lambda=0.25 | `Experiments_Results/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning/STL/label_noise/label_shuffle/label_shuffle_0p2_method_beta05_lg025/` |
+| Supplemental beta=1.00, lambda_gold=0.25 ablation | `Supplemental_Ablation_Results/STL/overrun_ablation_rerun_round2/seed42/label_noise/label_shuffle/label_shuffle_0p2_beta10_lg025/` |
+| Unified-path rerun | `Supplemental_Ablation_Results/STL/original_best_evaluator_rerun/seed42/label_noise/label_shuffle/label_shuffle_0p2_original_best_beta05_lg025/` |
 | Gold-guided ablations | `Experiments_Results/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning/STL/label_noise/label_shuffle/label_ablation/` |

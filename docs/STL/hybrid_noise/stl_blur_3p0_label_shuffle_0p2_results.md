@@ -20,7 +20,7 @@ Protocol:
 |---|---|---|---:|---:|---:|---:|---:|
 | Clean upper reference | Baseline | Clean train | 13 | 0.6931 | 0.6931 | 0.6662 | 100.0% |
 | Noise lower reference | Baseline | `blur_3p0 + label_shuffle_0p2` train | 2 | 0.2396 | 0.2804 | 0.2804 | 0.0% |
-| Best current method | Gold-guided CL, beta=0.90, lambda_gold=0.25 | `blur_3p0 + label_shuffle_0p2` train | 4 | 0.6500 | 0.6500 | 0.6331 | 90.5% |
+| Previous GGCL best | Gold-guided CL, beta=0.90, lambda_gold=0.25 | `blur_3p0 + label_shuffle_0p2` train | 4 | 0.6500 | 0.6500 | 0.6331 | 90.5% |
 
 ## Gold-Guided CL Ablations
 
@@ -38,10 +38,11 @@ Protocol:
 ## Notes
 
 - The hybrid baseline is much weaker than either single label noise or single blur noise, dropping to `0.2396` selected test accuracy.
-- Gold-guided CL recovers most of the gap: the best selected accuracy is `0.6500`, recovering `90.5%` of the clean-vs-hybrid gap.
-- The best setting keeps high `beta=0.90`, matching the single blur result where feature similarity is unreliable under strong blur.
+- Gold-guided CL recovers most of the gap: the previous GGCL best selected accuracy is `0.6500`, recovering `90.5%` of the clean-vs-hybrid gap.
+- Within the original sweep, the best setting keeps high `beta=0.90`, matching the single blur result where feature similarity is unreliable under strong blur.
 - Compared with single blur, the hybrid setting benefits from a stronger gold stability anchor: `lambda_gold=0.25` beats `0.15`, `0.20`, and `0.30`.
 - The label-noise best setting `beta=0.50, lambda_gold=0.25` is substantially weaker here, suggesting that blur corruption still dominates the controller design.
+- A supplemental rerun-confirmed `beta=1.00, lambda_gold=0.25` ablation reaches `0.6596`, exceeding this previous GGCL best; see `docs/ablation/supplemental_ablation_results.md`.
 
 ## Source Result Folders
 
@@ -50,4 +51,5 @@ Protocol:
 | Clean baseline | `Experiments_Results/Train_Clean_Test_Clean/STL/` |
 | Hybrid baseline | `Experiments_Results/Train_Noise_Test_Clean/Baseline_Exp/STL/hybrid_noise/blur_3p0_label_shuffle_0p2/` |
 | Gold-guided beta=0.90, lambda_gold=0.25 | `Experiments_Results/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning/STL/hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_beta09_lg025/` |
+| Supplemental beta=1.00, lambda_gold=0.25 ablation | `Supplemental_Ablation_Results/STL/overrun_ablation_rerun_round2/seed42/hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_beta10_lg025/` |
 | Gold-guided ablations | `Experiments_Results/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning/STL/hybrid_noise/blur_label_shuffle/blur_hybrid_ablation/` |

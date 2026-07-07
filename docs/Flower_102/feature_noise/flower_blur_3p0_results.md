@@ -42,6 +42,7 @@ Protocol:
 - Gold-guided CL more than closes the clean/noise gap in the current best run: selected test accuracy reaches `0.6151`, and peak/final test accuracy reaches `0.6353`.
 - For Flower_102 blur, the best observed `beta` is `0.80`. Lower `beta` values underuse the gold evaluator signal, while `0.85` and `0.90` are also strong but slightly worse here.
 - Around `beta=0.80`, `lambda_gold=0.10` is the best observed stability weight. Increasing to `0.15` remains strong, but `0.20` starts to reduce selected test accuracy.
+- The historical `Evaluators/Flower_102/model.pt` path in some metrics refers to the same evaluator later stored under `Gold_Evaluators/Flower_102/model.pt`.
 - The `Peak Test Acc` column is diagnostic only. The selected result should still be reported from the validation-loss selected checkpoint.
 
 ## Source Result Folders
@@ -51,4 +52,5 @@ Protocol:
 | Clean baseline | `Experiments_Results/Train_Clean_Test_Clean/Flower_102/` |
 | Blur baseline | `Experiments_Results/Train_Noise_Test_Clean/Baseline_Exp/Flower_102/feature_noise/blur_3p0/` |
 | Gold-guided beta=0.80, lambda_gold=0.10 | `Experiments_Results/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning/Flower_102/feature_noise/blur/blur_3p0_method_beta08_lg01/` |
+| Unified-path rerun | `Supplemental_Ablation_Results/Flower_102/original_best_evaluator_rerun/seed42/feature_noise/blur/blur_3p0_original_best_beta08_lg01/` |
 | Gold-guided ablations | `Experiments_Results/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning/Flower_102/feature_noise/blur/blur_ablations/` |

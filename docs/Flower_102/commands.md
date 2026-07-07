@@ -152,16 +152,19 @@ Generic feature-noise templates:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/blur_3p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/brightness_0p75 \
   --early-stop-patience 3 \
   --selection-metric val-loss
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss
@@ -171,6 +174,7 @@ Generic label-noise template:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss
@@ -184,6 +188,7 @@ Feature noise should start with a small beta sweep, because Flower_102 has a wea
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/blur_3p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -192,6 +197,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/blur/blur_3p0_method_beta02_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/blur_3p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -200,6 +206,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/blur/blur_3p0_method_beta05_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/blur_3p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -212,6 +219,7 @@ Brightness sweep:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/brightness_0p75 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -220,6 +228,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/brightness/brightness_0p75_method_beta02_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/brightness_0p75 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -228,6 +237,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/brightness/brightness_0p75_method_beta05_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/brightness_0p75 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -236,6 +246,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/brightness/brightness_0p75_method_beta08_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/brightness_0p75 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -248,6 +259,7 @@ If `beta=0.8` is best, use this lambda sweep:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/brightness_0p75 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -256,6 +268,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/brightness/brightness_0p75_method_beta08_lg005
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/brightness_0p75 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -264,6 +277,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/brightness/brightness_0p75_method_beta08_lg015
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/brightness_0p75 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -278,6 +292,7 @@ Gaussian sweep:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -286,6 +301,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/gaussian/gaussian_30p0_method_beta02_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -294,6 +310,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/gaussian/gaussian_30p0_method_beta05_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -302,6 +319,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/gaussian/gaussian_30p0_method_beta08_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -314,6 +332,7 @@ Gaussian lambda sweep used after selecting `beta=0.5`:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -322,6 +341,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/gaussian/gaussian_30p0_method_beta05_lg005
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -330,6 +350,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name feature_noise/gaussian/gaussian_30p0_method_beta05_lg015
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -342,6 +363,7 @@ Current Gaussian selected best:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -354,6 +376,7 @@ Label noise should start around balanced evaluator/prototype weighting. The imag
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -362,6 +385,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name label_noise/label_shuffle/label_shuffle_0p2_method_beta02_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -370,6 +394,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name label_noise/label_shuffle/label_shuffle_0p2_method_beta05_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -378,6 +403,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name label_noise/label_shuffle/label_shuffle_0p2_method_beta08_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -386,6 +412,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name label_noise/label_shuffle/label_shuffle_0p2_method_beta09_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -394,6 +421,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name label_noise/label_shuffle/label_shuffle_0p2_method_beta095_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -406,6 +434,7 @@ Label-noise lambda sweep around selected `beta=0.95`:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -414,6 +443,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name label_noise/label_shuffle/label_shuffle_0p2_method_beta095_lg005
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -428,6 +458,7 @@ Current label-noise selected best:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -442,6 +473,7 @@ Blur hybrid sweep:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -450,6 +482,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_feature_best_beta08_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -458,6 +491,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_label_best_beta095_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -466,6 +500,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_compromise_beta09_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -474,6 +509,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_beta07_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -486,6 +522,7 @@ Blur hybrid lambda sweep around `beta=0.80`:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -494,6 +531,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_beta08_lg005
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -506,6 +544,7 @@ Current blur hybrid selected best:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/blur_3p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -518,6 +557,7 @@ Brightness hybrid sweep:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -526,6 +566,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_feature_best_beta08_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -534,6 +575,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_label_best_beta095_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -542,6 +584,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_compromise_beta09_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -550,6 +593,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_beta07_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -562,6 +606,7 @@ Brightness hybrid local sweep:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -570,6 +615,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_beta075_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -578,6 +624,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_beta078_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -586,6 +633,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/brightness_label_shuffle/brightness_0p75_label_shuffle_0p2_beta08_lg005
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -598,6 +646,7 @@ Current brightness hybrid selected best:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/brightness_0p75_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -610,6 +659,7 @@ Gaussian hybrid sweep:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -618,6 +668,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_feature_best_beta05_lg015
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -626,6 +677,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta06_lg015
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -634,6 +686,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_compromise_beta07_lg015
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -642,6 +695,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta08_lg015
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -654,6 +708,7 @@ Gaussian hybrid local sweep:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -662,6 +717,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta05_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -670,6 +726,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta05_lg02
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -678,6 +735,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
   --run-name hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta045_lg015
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -690,6 +748,7 @@ Current gaussian hybrid selected best:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset Flower_102 \
+  --gold-evaluator-checkpoint Gold_Evaluators/Flower_102/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \

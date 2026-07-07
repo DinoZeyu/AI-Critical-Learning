@@ -21,7 +21,7 @@ Protocol:
 |---|---|---|---:|---:|---:|---:|---:|
 | Clean upper reference | Baseline | Clean train | 20 | 0.5596 | 0.5693 | 0.5596 | 100.0% |
 | Noise lower reference | Baseline | `gaussian_30p0 + label_shuffle_0p2` train | 16 | 0.4472 | 0.4679 | 0.4331 | 0.0% |
-| Best current method | Gold-guided CL, beta=0.50, lambda_gold=0.10 | `gaussian_30p0 + label_shuffle_0p2` train | 14 | 0.5486 | 0.5626 | 0.5559 | 90.2% |
+| Previous GGCL best | Gold-guided CL, beta=0.50, lambda_gold=0.10 | `gaussian_30p0 + label_shuffle_0p2` train | 14 | 0.5486 | 0.5626 | 0.5559 | 90.2% |
 
 ## Gold-Guided CL Ablations
 
@@ -40,9 +40,9 @@ Protocol:
 ## Notes
 
 - The gaussian hybrid baseline is stronger than the blur and brightness hybrid baselines, but it still drops below the clean baseline from `0.5596` to `0.4472`.
-- Gold-guided CL recovers most of the clean-vs-hybrid gap: the best selected accuracy reaches `0.5486`, recovering `90.2%` of the gap.
-- The best setting is `beta=0.50, lambda_gold=0.10`. This is close to the single Gaussian setting and confirms that Gaussian hybrid noise benefits from preserving feature/prototype similarity.
-- Increasing `beta` toward the label-noise best setting is clearly weaker here. The high-beta runs select early checkpoints and give lower selected accuracy.
+- Gold-guided CL recovers most of the clean-vs-hybrid gap: the previous GGCL best selected accuracy reaches `0.5486`, recovering `90.2%` of the gap.
+- Within the original sweep, the best setting is `beta=0.50, lambda_gold=0.10`. This is close to the single Gaussian setting and confirms that Gaussian hybrid noise benefits from preserving feature/prototype similarity.
+- In the original sweep, increasing `beta` toward the label-noise best setting is clearly weaker. A supplemental rerun-confirmed `beta=1.00, lambda_gold=0.10` ablation later reaches `0.5577`, exceeding this previous GGCL best; see `docs/ablation/supplemental_ablation_results.md`.
 - `lambda_gold=0.10` slightly beats `0.15` on validation-selected test accuracy, while `0.20` is too strong for this hybrid setting.
 - The `Peak Test Acc` column is diagnostic only. The selected result should still be reported from the validation-loss selected checkpoint.
 
@@ -53,4 +53,5 @@ Protocol:
 | Clean baseline | `Experiments_Results/Train_Clean_Test_Clean/Flower_102/` |
 | Hybrid baseline | `Experiments_Results/Train_Noise_Test_Clean/Baseline_Exp/Flower_102/hybrid_noise/gaussian_30p0_label_shuffle_0p2/` |
 | Gold-guided beta=0.50, lambda_gold=0.10 | `Experiments_Results/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning/Flower_102/hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta05_lg01/` |
+| Supplemental beta=1.00, lambda_gold=0.10 ablation | `Supplemental_Ablation_Results/Flower_102/overrun_ablation_rerun_round2/seed42/hybrid_noise/gaussian_label_shuffle/gaussian_30p0_label_shuffle_0p2_beta10_lg01/` |
 | Gold-guided ablations | `Experiments_Results/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning/Flower_102/hybrid_noise/gaussian_label_shuffle/gaussian_hybrid_ablation/` |

@@ -127,16 +127,19 @@ Generic feature-noise templates using script defaults:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/feature_noise/blur_3p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/feature_noise/brightness_0p75 \
   --early-stop-patience 3 \
   --selection-metric val-loss
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss
@@ -146,6 +149,7 @@ Generic label-noise template:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss
@@ -157,6 +161,7 @@ These are experiment-selected hyperparameters, not fixed method defaults.
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/feature_noise/blur_3p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -165,6 +170,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
   --run-name feature_noise/blur/blur_3p0_method_beta09_lg015
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/feature_noise/brightness_0p75 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -173,6 +179,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
   --run-name feature_noise/brightness/brightness_0p75_method_beta09_lg01
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/feature_noise/gaussian_30p0 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -181,6 +188,7 @@ python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
   --run-name feature_noise/gaussian/gaussian_30p0_method_beta05_lg015
 
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/label_noise/label_shuffle_0p2 \
   --early-stop-patience 3 \
   --selection-metric val-loss \
@@ -305,6 +313,7 @@ Dynamic non-negative controller:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/feature_noise/blur_3p0 \
   --alpha-schedule linear \
   --alpha-start 0.5 \
@@ -316,6 +325,7 @@ Freeze learner BatchNorm running stats during noisy mixed-data training:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/feature_noise/blur_3p0 \
   --freeze-learner-batch-norm \
   --run-name feature_noise/blur/blur_3p0_strong_gold_freeze_bn
@@ -325,6 +335,7 @@ Old LR profile ablation:
 
 ```bash
 python scripts/Gold_Guided_Critical_Learning.py --dataset STL \
+  --gold-evaluator-checkpoint Gold_Evaluators/STL/model.pt \
   --mixed-train-dir Image_Data/Train_Noise_Data/STL/feature_noise/blur_3p0 \
   --optimizer sgd \
   --base-lr 0.05 \

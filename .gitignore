@@ -72,6 +72,15 @@ env_superpod.sh
 /checkpoints/
 /runs/
 /logs/
+/Supplemental_Ablation_Results/
+/.supplemental_ablation_raw/
+/.confirm_overrun_raw/
+/.overrun_ablation_rerun_raw/
+/.remaining_overrun_ablation_rerun_raw/
+/.original_best_evaluator_rerun_raw/
+
+# Local compiled/view-only paper artifact
+/main.pdf
 
 # =========================
 # Model / Weights
