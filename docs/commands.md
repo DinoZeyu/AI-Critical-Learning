@@ -17,7 +17,9 @@ bash scripts/seeded_runs/run_all_seeds.sh
 Run from inside a seed container:
 
 ```bash
+bash seed_22/run_all_experiments.sh
 bash seed_42/run_all_experiments.sh
+bash seed_62/run_all_experiments.sh
 ```
 
 Rerun canonical seed 42 supplemental ablations and replace the existing
@@ -46,6 +48,9 @@ seed_<seed>/Noise_Baseline/
 seed_<seed>/docs/
 seed_<seed>/run_all_experiments.sh
 ```
+
+Gold-guided and sweep results are stored directly under
+`seed_<seed>/Experiments_Results/<dataset>/...`.
 
 Shared clean/gold image data remains under root-level `Image_Data/`.
 The shared train-clean/test-clean baseline results remain under root-level

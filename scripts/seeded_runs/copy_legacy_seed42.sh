@@ -38,7 +38,7 @@ copy_dir "Image_Data/Train_Noise_Data" "${DEST_ROOT}/Train_Noise_Data"
 copy_dir "Gold_Evaluators" "${DEST_ROOT}/Gold_Evaluators"
 copy_dir \
   "Experiments_Results/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning" \
-  "${DEST_ROOT}/Experiments_Results/Gold_Guided_Critical_Learning"
+  "${DEST_ROOT}/Experiments_Results"
 copy_dir \
   "Experiments_Results/Train_Noise_Test_Clean/Baseline_Exp" \
   "${DEST_ROOT}/Noise_Baseline"

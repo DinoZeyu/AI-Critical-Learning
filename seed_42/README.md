@@ -19,8 +19,8 @@ Noise baselines are stored in:
 seed_42/Noise_Baseline/
 ```
 
-Gold-guided and sweep results are stored in:
+Gold-guided and sweep results are stored directly by dataset in:
 
 ```text
-seed_42/Experiments_Results/Gold_Guided_Critical_Learning/
+seed_42/Experiments_Results/
 ```

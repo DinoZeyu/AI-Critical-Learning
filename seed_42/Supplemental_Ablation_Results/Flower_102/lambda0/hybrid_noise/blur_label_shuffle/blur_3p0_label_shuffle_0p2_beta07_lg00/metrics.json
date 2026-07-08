@@ -48,15 +48,15 @@
   "seed": 42,
   "device": "cuda",
   "selected_epoch": 11,
-  "selected_validation_loss": 1.797677461780719,
-  "best_validation_accuracy": 0.5149253731343284,
-  "test_loss_at_selected_epoch": 2.023611571414484,
-  "test_accuracy_at_selected_epoch": 0.4899205864386072,
+  "selected_validation_loss": 1.7985039771492801,
+  "best_validation_accuracy": 0.5074626865671642,
+  "test_loss_at_selected_epoch": 2.043795093721053,
+  "test_accuracy_at_selected_epoch": 0.4954184483811851,
   "peak_test_checkpoint_policy": "diagnostic_oracle_best_clean_test_accuracy",
-  "max_test_accuracy_observed": 0.4899205864386072,
-  "max_test_loss_at_peak": 2.023611571414484,
+  "max_test_accuracy_observed": 0.4954184483811851,
+  "max_test_loss_at_peak": 2.043795093721053,
   "max_test_epoch_observed": 11,
   "peak_test_checkpoint": "seed_42/Supplemental_Ablation_Results/Flower_102/lambda0/hybrid_noise/blur_label_shuffle/blur_3p0_label_shuffle_0p2_beta07_lg00/model_peak_test.pt",
-  "final_test_accuracy": 0.46182040317654244,
-  "final_test_loss": 2.2229770935375512
+  "final_test_accuracy": 0.45326817348808796,
+  "final_test_loss": 2.245833374264041
 }

@@ -23,6 +23,9 @@ seed_<seed>/docs/
 seed_<seed>/run_all_experiments.sh
 ```
 
+Gold-guided and sweep results are stored directly by dataset under
+`seed_<seed>/Experiments_Results/`.
+
 The fixed shared data remains in the repository root:
 
 ```text

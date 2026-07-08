@@ -78,6 +78,7 @@ env_superpod.sh
 /checkpoints/
 /runs/
 /logs/
+*.log
 /Supplemental_Ablation_Results/
 /.supplemental_ablation_raw/
 /.confirm_overrun_raw/

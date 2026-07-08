@@ -336,7 +336,7 @@ run_ggcl() {
   local lambda_gold="$4"
   local run_name="$5"
   local generated_dir="${RAW_GGCL_RESULTS_ROOT}/Train_Noise_Test_Clean/Gold_Guided_Critical_Learning/${dataset}/${run_name}"
-  local final_dir="${RESULTS_ROOT}/Gold_Guided_Critical_Learning/${dataset}/${run_name}"
+  local final_dir="${RESULTS_ROOT}/${dataset}/${run_name}"
   local target_metrics="${final_dir}/metrics.json"
 
   if ! should_run_final_dir "${final_dir}" "${target_metrics}" "GGCL run"; then
