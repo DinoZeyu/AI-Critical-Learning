@@ -44,4 +44,4 @@ Full exact-parameter tables are written separately because they contain every ma
 - `Selected Acc` is the headline metric selected by clean gold validation loss.
 - `Peak Acc` is diagnostic/oracle-style and should not be used as the deployment selection metric.
 - `Final Acc` is useful for stability checks and overfitting diagnosis.
-- Recovery is normalized by the seed-specific noisy baseline and the shared clean baseline for the same dataset.
+- Recovery is computed from the mean selected accuracies as `(Best GGCL Sel. - Noise baseline Sel.) / (Clean baseline Sel. - Noise baseline Sel.)`.
