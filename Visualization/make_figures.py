@@ -52,12 +52,12 @@ NOISE_RANK = {rel: i for i, (rel, _) in enumerate(NOISE_ORDER)}
 NOISE_LABEL = dict(NOISE_ORDER)
 COMPACT_NOISE_LABEL = {
     "feature_noise/blur_3p0": "Blur",
-    "feature_noise/brightness_0p75": "Bright-\nness",
-    "feature_noise/gaussian_30p0": "Gaus-\nsian",
+    "feature_noise/brightness_0p75": "Brightness",
+    "feature_noise/gaussian_30p0": "Gaussian",
     "label_noise/label_shuffle_0p2": "Label",
     "hybrid_noise/blur_3p0_label_shuffle_0p2": "Blur\n+Label",
-    "hybrid_noise/brightness_0p75_label_shuffle_0p2": "Bright-\nness\n+Label",
-    "hybrid_noise/gaussian_30p0_label_shuffle_0p2": "Gaus-\nsian\n+Label",
+    "hybrid_noise/brightness_0p75_label_shuffle_0p2": "Brightness\n+Label",
+    "hybrid_noise/gaussian_30p0_label_shuffle_0p2": "Gaussian\n+Label",
 }
 
 COL = {
@@ -81,14 +81,15 @@ COL = {
 
 BAR_COL = {
     "ggcl": "#F9CCE0",
-    "ggcl_dark": "#B85C86",
+    "ggcl_dark": "#A83B72",
     "noise": "#FEF1F3",
-    "noise_dark": "#C78C9A",
+    "noise_dark": "#C87C91",
 }
 
 SINGLE_COLUMN_WIDTH_IN = 3.48
 SINGLE_COLUMN_16_9_SIZE = (SINGLE_COLUMN_WIDTH_IN, SINGLE_COLUMN_WIDTH_IN * 9 / 16)
 BAR_PANEL_SIZE = SINGLE_COLUMN_16_9_SIZE
+SUBFIG_PANEL_SIZE = (SINGLE_COLUMN_WIDTH_IN * 0.49, SINGLE_COLUMN_WIDTH_IN * 0.44)
 
 
 def configure_style() -> None:
@@ -188,15 +189,16 @@ def hide_inner_y_axis(axes: np.ndarray) -> None:
         ax.tick_params(axis="y", left=False, labelleft=False)
 
 
-def figure_accuracy(main_df: pd.DataFrame, formats: list[str], dpi: int) -> list[Path]:
-    fig, axes = plt.subplots(1, 2, figsize=BAR_PANEL_SIZE, sharey=True)
-    bar_width = 0.28
-    handles = [
+def accuracy_legend_handles() -> list[Patch | Line2D]:
+    return [
         Patch(facecolor=BAR_COL["noise"], edgecolor="none", label="Noisy baseline"),
         Patch(facecolor=BAR_COL["ggcl"], edgecolor="none", label="GCL"),
-        Line2D([0], [0], color=COL["clean"], lw=0.68, ls=(0, (4, 2)), label="Clean baseline"),
+        Line2D([0], [0], color=COL["clean"], lw=0.76, ls=(0, (4, 2)), label="Clean baseline"),
     ]
-    y_max = min(
+
+
+def accuracy_y_max(main_df: pd.DataFrame) -> float:
+    return min(
         100.0,
         max(
             main_df["selected_acc_mean"].max() + main_df["selected_acc_std"].max(),
@@ -207,84 +209,122 @@ def figure_accuracy(main_df: pd.DataFrame, formats: list[str], dpi: int) -> list
         + 5.5,
     )
 
+
+def draw_accuracy_panel(
+    ax: plt.Axes,
+    rows: pd.DataFrame,
+    dataset: str,
+    y_max: float,
+    *,
+    show_title: bool,
+) -> None:
+    bar_width = 0.34
+    x = np.arange(len(rows))
+    noisy = rows["noise_selected_acc_mean"].to_numpy() * 100.0
+    noisy_std = rows["noise_selected_acc_std"].to_numpy() * 100.0
+    ggcl = rows["selected_acc_mean"].to_numpy() * 100.0
+    ggcl_std = rows["selected_acc_std"].to_numpy() * 100.0
+    clean = float(rows["clean_selected_acc"].iloc[0]) * 100.0
+    clean_x0, clean_x1 = -0.55, len(rows) - 0.45
+
+    error_kw = {
+        "elinewidth": 0.36,
+        "capsize": 0.75,
+        "capthick": 0.36,
+    }
+    ax.bar(
+        x - bar_width / 2,
+        noisy,
+        width=bar_width,
+        color=BAR_COL["noise"],
+        edgecolor=BAR_COL["noise_dark"],
+        linewidth=0.18,
+        yerr=noisy_std,
+        error_kw={**error_kw, "ecolor": BAR_COL["noise_dark"]},
+        zorder=2,
+    )
+    ax.bar(
+        x + bar_width / 2,
+        ggcl,
+        width=bar_width,
+        color=BAR_COL["ggcl"],
+        edgecolor=BAR_COL["ggcl_dark"],
+        linewidth=0.20,
+        yerr=ggcl_std,
+        error_kw={**error_kw, "ecolor": BAR_COL["ggcl_dark"]},
+        zorder=3,
+    )
+    ax.hlines(clean, clean_x0, clean_x1, color=COL["clean"], lw=0.76, ls=(0, (4, 2)), zorder=6)
+
+    if show_title:
+        ax.set_title(DATASET_LABELS[dataset], pad=1.4, fontsize=4.2)
+    ax.set_xticks(x)
+    ax.set_xticklabels([])
+    compact_labels = rows["train_rel"].map(COMPACT_NOISE_LABEL).to_numpy()
+    for xi, label in zip(x, compact_labels):
+        ax.text(
+            xi,
+            -0.058,
+            label,
+            transform=ax.get_xaxis_transform(),
+            ha="center",
+            va="top",
+            fontsize=2.35,
+            color=COL["ink"],
+            linespacing=0.86,
+            clip_on=False,
+        )
+    ax.set_xlim(-0.6, len(rows) - 0.4)
+    ax.set_ylim(0.0, y_max)
+    ax.grid(axis="x", visible=False)
+    ax.grid(axis="y", visible=True)
+    ax.tick_params(axis="both", width=0.42, length=1.7, pad=1.2)
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color(COL["ink"])
+        spine.set_linewidth(0.36)
+
+
+def figure_accuracy(main_df: pd.DataFrame, formats: list[str], dpi: int) -> list[Path]:
+    fig, axes = plt.subplots(1, 2, figsize=BAR_PANEL_SIZE, sharey=True)
+    handles = accuracy_legend_handles()
+    y_max = accuracy_y_max(main_df)
+
     for ax, dataset in zip(axes, DATASETS):
         rows = ordered_dataset_rows(main_df, dataset)
-        x = np.arange(len(rows))
-        noisy = rows["noise_selected_acc_mean"].to_numpy() * 100.0
-        noisy_std = rows["noise_selected_acc_std"].to_numpy() * 100.0
-        ggcl = rows["selected_acc_mean"].to_numpy() * 100.0
-        ggcl_std = rows["selected_acc_std"].to_numpy() * 100.0
-        clean = float(rows["clean_selected_acc"].iloc[0]) * 100.0
-
-        clean_x0, clean_x1 = -0.55, len(rows) - 0.45
-
-        error_kw = {
-            "elinewidth": 0.36,
-            "capsize": 0.75,
-            "capthick": 0.36,
-        }
-        ax.bar(
-            x - bar_width / 2,
-            noisy,
-            width=bar_width,
-            color=BAR_COL["noise"],
-            edgecolor=BAR_COL["noise_dark"],
-            linewidth=0.16,
-            yerr=noisy_std,
-            error_kw={**error_kw, "ecolor": BAR_COL["noise_dark"]},
-            zorder=2,
-        )
-        ax.bar(
-            x + bar_width / 2,
-            ggcl,
-            width=bar_width,
-            color=BAR_COL["ggcl"],
-            edgecolor=BAR_COL["ggcl_dark"],
-            linewidth=0.16,
-            yerr=ggcl_std,
-            error_kw={**error_kw, "ecolor": BAR_COL["ggcl_dark"]},
-            zorder=3,
-        )
-        ax.hlines(clean, clean_x0, clean_x1, color=COL["clean"], lw=0.68, ls=(0, (4, 2)), zorder=6)
-
-        ax.set_title(DATASET_LABELS[dataset], pad=2, fontsize=4.35)
-        ax.set_xticks(x)
-        ax.set_xticklabels([])
-        compact_labels = rows["train_rel"].map(COMPACT_NOISE_LABEL).to_numpy()
-        for xi, label in zip(x, compact_labels):
-            ax.text(
-                xi,
-                -0.075,
-                label,
-                transform=ax.get_xaxis_transform(),
-                ha="center",
-                va="top",
-                fontsize=2.45,
-                color=COL["ink"],
-                linespacing=0.86,
-                clip_on=False,
-            )
-        ax.set_xlim(-0.6, len(rows) - 0.4)
-        ax.set_ylim(0.0, y_max)
-        ax.grid(axis="x", visible=False)
-        ax.grid(axis="y", visible=True)
-        ax.tick_params(axis="both", width=0.42, length=1.7, pad=1.2)
-        for spine in ax.spines.values():
-            spine.set_visible(True)
-            spine.set_color(COL["ink"])
-            spine.set_linewidth(0.36)
+        draw_accuracy_panel(ax, rows, dataset, y_max, show_title=True)
 
     hide_inner_y_axis(axes)
-    axes[0].set_ylabel("Selected Accuracy (%)", fontsize=3.95, labelpad=2)
+    axes[0].set_ylabel("Selected Accuracy (%)", fontsize=3.8, labelpad=1.7)
     for ax in axes:
-        ax.tick_params(axis="y", labelsize=3.9)
-    fig.text(0.56, 0.075, "Noise Type", ha="center", va="center", fontsize=3.9, color=COL["ink"])
-    legend = fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.53, 1.025), ncol=3, frameon=False, handlelength=0.9)
+        ax.tick_params(axis="y", labelsize=3.75)
+    fig.text(0.56, 0.055, "Noise Type", ha="center", va="center", fontsize=3.8, color=COL["ink"])
+    legend = fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.53, 0.985), ncol=3, frameon=False, handlelength=0.9)
     shrink_legend_text(legend)
     for text in legend.get_texts():
-        text.set_fontsize(4.0)
-    fig.subplots_adjust(left=0.105, right=0.995, bottom=0.185, top=0.80, wspace=0.08)
+        text.set_fontsize(3.9)
+    fig.subplots_adjust(left=0.095, right=0.997, bottom=0.145, top=0.855, wspace=0.075)
     return save_figure(fig, "accuracy_with_baselines_singlecol", formats, dpi)
+
+
+def figure_accuracy_subfigures(main_df: pd.DataFrame, formats: list[str], dpi: int) -> list[Path]:
+    outputs: list[Path] = []
+    y_max = accuracy_y_max(main_df)
+    stems = {
+        "STL": "accuracy_stl10_subfigure",
+        "Flower_102": "accuracy_flower102_subfigure",
+    }
+
+    for dataset in DATASETS:
+        fig, ax = plt.subplots(1, 1, figsize=SUBFIG_PANEL_SIZE)
+        rows = ordered_dataset_rows(main_df, dataset)
+        draw_accuracy_panel(ax, rows, dataset, y_max, show_title=False)
+        ax.set_ylabel("Selected Accuracy (%)", fontsize=3.8, labelpad=1.7)
+        ax.tick_params(axis="y", labelsize=3.75)
+        fig.text(0.56, 0.045, "Noise Type", ha="center", va="center", fontsize=3.8, color=COL["ink"])
+        fig.subplots_adjust(left=0.175, right=0.995, bottom=0.185, top=0.985)
+        outputs.extend(save_figure(fig, stems[dataset], formats, dpi))
+    return outputs
 
 
 def parse_args() -> argparse.Namespace:
@@ -306,7 +346,9 @@ def main() -> None:
     main_df = load_main_stats()
 
     outputs: list[Path] = []
-    outputs.extend(figure_accuracy(main_df, args.formats, args.dpi))
+
+    # Only generate the individual subfigure panels.
+    outputs.extend(figure_accuracy_subfigures(main_df, args.formats, args.dpi))
 
     print("Generated figures:")
     for path in outputs:
