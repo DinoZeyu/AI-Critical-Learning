@@ -1,0 +1,58 @@
+# Local publication style for Gold-Guided Critical Learning figures.
+# Based on SciencePlots-style scientific plotting defaults:
+# https://github.com/garrettj403/SciencePlots
+
+figure.figsize : 3.3, 2.5
+figure.dpi : 120
+savefig.dpi : 600
+savefig.bbox : tight
+savefig.pad_inches : 0.02
+
+font.family : serif
+font.serif : STIXGeneral, DejaVu Serif, Times New Roman, Times
+font.size : 7
+mathtext.fontset : cm
+text.usetex : False
+
+axes.linewidth : 0.5
+axes.edgecolor : 2B2B2B
+axes.labelcolor : 2B2B2B
+axes.titlesize : 7.5
+axes.labelsize : 7
+axes.prop_cycle : cycler('color', ['C99B2E', 'D9988E', '2F7A4E', 'F1C86A', '9A5D55', '8E7A60'])
+
+lines.linewidth : 1.05
+lines.markersize : 3.0
+patch.linewidth : 0.0
+
+xtick.direction : in
+xtick.major.size : 3
+xtick.major.width : 0.5
+xtick.minor.size : 1.5
+xtick.minor.width : 0.5
+xtick.color : 676B6F
+xtick.labelsize : 6.2
+xtick.top : False
+
+ytick.direction : in
+ytick.major.size : 3
+ytick.major.width : 0.5
+ytick.minor.size : 1.5
+ytick.minor.width : 0.5
+ytick.color : 676B6F
+ytick.labelsize : 6.2
+ytick.right : False
+
+grid.color : ECE8E2
+grid.linewidth : 0.42
+grid.alpha : 1.0
+
+legend.frameon : False
+legend.fontsize : 6.2
+legend.handlelength : 1.6
+legend.handletextpad : 0.35
+legend.columnspacing : 0.75
+
+pdf.fonttype : 42
+ps.fonttype : 42
+svg.fonttype : none
