@@ -119,11 +119,10 @@ Per-seed result docs live under `seed_<seed>/docs/`.
 
 ## Figures
 
-Generate single-column 16:9 PDF/PNG figures for LaTeX:
+Generate the single-column PDF figure for LaTeX:
 
 ```bash
 .venv/bin/python Visualization/make_figures.py
 ```
 
-Outputs are written to `Visualization/Figures/`. Use the PDF files in
-`main.tex`; PNG files are high-resolution previews or submission fallbacks.
+Output is written to `Visualization/Figures/`. Use the PDF file in `main.tex`.
