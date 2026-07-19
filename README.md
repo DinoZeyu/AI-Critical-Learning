@@ -117,6 +117,31 @@ Main multi-seed summaries:
 
 Per-seed result docs live under `seed_<seed>/docs/`.
 
+### Which numbers match the paper?
+
+The paper reports the **fixed-configuration** protocol: for each corruption
+setting a single `(beta, lambda_gold)` is evaluated across all three seeds
+(22, 42, 62), and the reported value is the mean ± std over seeds.
+
+- **Table II (`GCL` column)** and the **bold rows of Tables III–IV** come from
+  `docs/multi_seed_ggcl_exact_run_stats.csv` — per setting, the row with the
+  highest `selected_acc_mean`.
+- Noisy/clean baselines and recovery denominators come from
+  `noise_selected_acc_mean` and `clean_selected_acc` in
+  `docs/multi_seed_main_setting_stats.csv`.
+- Dataset splits (Table I): `D_t` from `seed_*/Train_Noise_Data/*/labels.csv`,
+  `D_G` from `gold_examples` in `seed_*/Gold_Evaluators/*/metrics.json`, and the
+  clean test size from the per-class `total` in
+  `Clean_Baseline/*/per_class_accuracy_selected.csv`.
+
+> **Note.** The `best_ggcl_by_setting` rows in
+> `docs/multi_seed_main_setting_stats.csv` select the best configuration
+> *independently per seed* (an oracle selection) and are therefore higher than
+> the paper (e.g., STL-10 blur reads 63.97 / recovery 307.9% vs. the reported
+> 63.62 / 284.8%). These are provided for analysis only and are **not** the
+> numbers reported in the paper.
+
+
 ## Figures
 
 Generate the single-column PDF figure for LaTeX:
